@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql
+    ports:
+      - '23306:3306'
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_USER: graphql_user
+      MYSQL_PASSWORD: graphql_password
+      MYSQL_DATABASE: graphql_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+
+volumes:
+  mysql-data:
+  
