@@ -1,16 +1,16 @@
 package net.shyshkin.study.graphql.gettingstarted.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import net.shyshkin.study.graphql.gettingstarted.entity.Student;
 import net.shyshkin.study.graphql.gettingstarted.entity.Subject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Setter
-@Getter
+@Data
+@NoArgsConstructor
 public class StudentResponse {
 
 	private long id;

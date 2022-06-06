@@ -1,12 +1,12 @@
 package net.shyshkin.study.graphql.gettingstarted.response;
 
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import net.shyshkin.study.graphql.gettingstarted.entity.Subject;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
 public class SubjectResponse {
 
 	private Long id;
