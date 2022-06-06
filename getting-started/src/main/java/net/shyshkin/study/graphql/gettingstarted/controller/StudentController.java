@@ -12,13 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/student/")
+@RequestMapping("/api/students")
 public class StudentController {
 
 	@Autowired
 	StudentService studentService;
 	
-	@GetMapping("getAll")
+	@GetMapping
 	public List<StudentResponse> getAllStudents () {
 		List<Student> studentList = studentService.getAllStudents();
 		List<StudentResponse> studentResponseList = new ArrayList<StudentResponse>();
@@ -30,17 +30,17 @@ public class StudentController {
 		return studentResponseList;
 	}
 	
-	@GetMapping("getFirstNameById/{id}")
+	@GetMapping("/{id}/firstName")
 	public String getFirstNameById (@PathVariable long id) {
 		return studentService.getFirstNameById(id);
 	}
 	
-	@GetMapping("getLastNameById/{id}")
+	@GetMapping("/{id}/lastName")
 	public String getLastNameById (@PathVariable long id) {
 		return studentService.getLastNameById(id);
 	}
 	
-	@PostMapping("create")
+	@PostMapping
 	public StudentResponse createStudent (@Valid @RequestBody CreateStudentRequest createStudentRequest) {
 		Student student = studentService.createStudent(createStudentRequest);
 		

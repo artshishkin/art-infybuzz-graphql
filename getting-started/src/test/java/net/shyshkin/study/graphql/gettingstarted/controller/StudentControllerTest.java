@@ -32,7 +32,7 @@ class StudentControllerTest {
     void getAllStudents() {
 
         //when
-        ResponseEntity<List<StudentResponse>> responseEntity = restTemplate.exchange("/api/student/getAll", HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+        ResponseEntity<List<StudentResponse>> responseEntity = restTemplate.exchange("/api/students", HttpMethod.GET, null, new ParameterizedTypeReference<>() {
         });
 
         //then
@@ -50,7 +50,7 @@ class StudentControllerTest {
         long studentId = 2L;
 
         //when
-        var responseEntity = restTemplate.getForEntity("/api/student/getFirstNameById/{id}", String.class, studentId);
+        var responseEntity = restTemplate.getForEntity("/api/students/{id}/firstName", String.class, studentId);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -68,7 +68,7 @@ class StudentControllerTest {
         long studentId = 3L;
 
         //when
-        var responseEntity = restTemplate.getForEntity("/api/student/getLastNameById/{id}", String.class, studentId);
+        var responseEntity = restTemplate.getForEntity("/api/students/{id}/lastName", String.class, studentId);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -96,7 +96,7 @@ class StudentControllerTest {
 
 
         //when
-        var responseEntity = restTemplate.postForEntity("/api/student/create", createStudentRequest, StudentResponse.class);
+        var responseEntity = restTemplate.postForEntity("/api/students", createStudentRequest, StudentResponse.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
