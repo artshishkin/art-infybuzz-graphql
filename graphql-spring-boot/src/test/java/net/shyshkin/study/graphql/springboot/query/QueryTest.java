@@ -1,6 +1,7 @@
 package net.shyshkin.study.graphql.springboot.query;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
@@ -15,104 +16,111 @@ class QueryTest {
     @Autowired
     private GraphQlTester graphQlTester;
 
-    @Test
-    void firstQuery() {
-        //given
-        String document = "{firstQuery}";
+    @Nested
+    class WithInlinedDocumentTests {
 
-        //when
-        GraphQlTester.Response response = graphQlTester.document(document)
-                .execute();
+        @Test
+        void firstQuery() {
+            //given
+            String document = "{firstQuery}";
 
-        //then
-        response.path("firstQuery")
-                .entity(String.class)
-                .isEqualTo("First Query");
+            //when
+            GraphQlTester.Response response = graphQlTester.document(document)
+                    .execute();
+
+            //then
+            response.path("firstQuery")
+                    .entity(String.class)
+                    .isEqualTo("First Query");
+        }
+
+        @Test
+        void secondQuery() {
+            //given
+            String document = "{\n" +
+                    "secondQuery\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(document)
+                    .execute();
+
+            //then
+            response.path("firstQuery")
+                    .pathDoesNotExist();
+            response.path("secondQuery")
+                    .entity(String.class)
+                    .isEqualTo("Second Query");
+        }
+
+        @Test
+        void bothFirstAndSecondQueries() {
+
+            //given
+            String document = "{\n" +
+                    "firstQuery\n" +
+                    "secondQuery\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(document)
+                    .execute();
+
+            //then
+            response.path("firstQuery")
+                    .entity(String.class)
+                    .isEqualTo("First Query");
+            response.path("secondQuery")
+                    .entity(String.class)
+                    .isEqualTo("Second Query");
+        }
     }
 
-    @Test
-    void secondQuery() {
-        //given
-        String document = "{\n" +
-                "secondQuery\n" +
-                "}";
+    @Nested
+    class WithExternalDocumentTests {
 
-        //when
-        GraphQlTester.Response response = graphQlTester.document(document)
-                .execute();
+        @Test
+        void firstQuery_throughDocument() {
 
-        //then
-        response.path("firstQuery")
-                .pathDoesNotExist();
-        response.path("secondQuery")
-                .entity(String.class)
-                .isEqualTo("Second Query");
+            //when
+            GraphQlTester.Response response = graphQlTester.documentName("firstQueryDoc")
+                    .execute();
+
+            //then
+            response.path("firstQuery")
+                    .entity(String.class)
+                    .isEqualTo("First Query");
+        }
+
+        @Test
+        void secondQuery_throughDocument() {
+
+            //when
+            GraphQlTester.Response response = graphQlTester.documentName("secondQueryDoc")
+                    .execute();
+
+            //then
+            response.path("firstQuery")
+                    .pathDoesNotExist();
+            response.path("secondQuery")
+                    .entity(String.class)
+                    .isEqualTo("Second Query");
+        }
+
+        @Test
+        void bothFirstAndSecondQueries_throughDocument() {
+
+            //when
+            GraphQlTester.Response response = graphQlTester.documentName("bothQueriesDoc")
+                    .execute();
+
+            //then
+            response.path("firstQuery")
+                    .entity(String.class)
+                    .isEqualTo("First Query");
+            response.path("secondQuery")
+                    .entity(String.class)
+                    .isEqualTo("Second Query");
+        }
     }
-
-    @Test
-    void bothFirstAndSecondQueries() {
-
-        //given
-        String document = "{\n" +
-                "firstQuery\n" +
-                "secondQuery\n" +
-                "}";
-
-        //when
-        GraphQlTester.Response response = graphQlTester.document(document)
-                .execute();
-
-        //then
-        response.path("firstQuery")
-                .entity(String.class)
-                .isEqualTo("First Query");
-        response.path("secondQuery")
-                .entity(String.class)
-                .isEqualTo("Second Query");
-    }
-
-    @Test
-    void firstQuery_throughDocument() {
-
-        //when
-        GraphQlTester.Response response = graphQlTester.documentName("firstQueryDoc")
-                .execute();
-
-        //then
-        response.path("firstQuery")
-                .entity(String.class)
-                .isEqualTo("First Query");
-    }
-
-    @Test
-    void secondQuery_throughDocument() {
-
-        //when
-        GraphQlTester.Response response = graphQlTester.documentName("secondQueryDoc")
-                .execute();
-
-        //then
-        response.path("firstQuery")
-                .pathDoesNotExist();
-        response.path("secondQuery")
-                .entity(String.class)
-                .isEqualTo("Second Query");
-    }
-
-    @Test
-    void bothFirstAndSecondQueries_throughDocument() {
-
-        //when
-        GraphQlTester.Response response = graphQlTester.documentName("bothQueriesDoc")
-                .execute();
-
-        //then
-        response.path("firstQuery")
-                .entity(String.class)
-                .isEqualTo("First Query");
-        response.path("secondQuery")
-                .entity(String.class)
-                .isEqualTo("Second Query");
-    }
-
 }
