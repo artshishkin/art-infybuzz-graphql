@@ -1,0 +1,25 @@
+### GET all students
+GET http://localhost:8080/api/students
+Accept: application/json
+
+### GET first name by student id
+GET http://localhost:8080/api/students/2/firstName
+Accept: application/json
+
+### GET last name by student id
+GET http://localhost:8080/api/students/3/lastName
+Accept: application/json
+
+
+### Send POST request to CREATE new student
+POST http://localhost:8080/api/students
+Content-Type: application/json
+
+{
+  "first_name": "Art",
+  "lastName": "Shyshkin",
+  "city": "Volodymyr",
+  "street": "Zymnivska",
+  "email": "d.art.shishkin@gmail.com",
+  "subjectsLearning": []
+}
