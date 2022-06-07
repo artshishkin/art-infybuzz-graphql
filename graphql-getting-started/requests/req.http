@@ -1,0 +1,11 @@
+### GET GraphiQL UI
+GET http://localhost:8080/graphiql
+
+### Request First Query
+GET http://localhost:8080/graphiql?query=query%20%7B%0A%20%20firstQuery%0A%7D%0A
+
+### Request Second Query
+GET http://localhost:8080/graphiql?query=query%20%7B%0A%20%20secondQuery%0A%7D%0A
+
+### Request BOTH First Query and Second Query
+GET http://localhost:8080/graphiql?query=query%7B%0A%20%20firstQuery%0A%20%20secondQuery%0A%7D%0A

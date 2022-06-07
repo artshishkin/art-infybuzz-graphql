@@ -10,4 +10,8 @@ public class Query implements GraphQLQueryResolver {
         return "First Query";
     }
 
+    public String secondQuery() {
+        return "Second Query";
+    }
+
 }
