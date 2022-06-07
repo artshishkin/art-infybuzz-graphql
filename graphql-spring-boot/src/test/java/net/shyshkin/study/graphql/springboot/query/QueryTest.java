@@ -9,6 +9,9 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 @Slf4j
 //@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 //@AutoConfigureGraphQlTester
@@ -221,6 +224,57 @@ class QueryTest {
             response.path("fullNameJson")
                     .entity(String.class)
                     .isEqualTo("Arina Shyshkina");
+        }
+    }
+
+    @Nested
+    class SchemaValidationTests {
+        @Test
+        void fullName() {
+
+            //given
+            String fullNameQuery = "{\n" +
+                    "fullNameJson(sampleRequest:{\n" +
+                    "    lastName:\"Shyshkin\"\n" +
+                    "  })\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+            response.errors()
+                    .satisfy(errors -> assertThat(errors)
+                                    .hasSize(1)
+                                    .allSatisfy(error -> assertAll(
+//                                    () -> assertThat(error).isInstanceOf(ValidationError.class),
+                                                    () -> assertThat(error.getMessage().toLowerCase()).contains("firstname", "valid"))
+                                    )
+                    );
+        }
+
+        @Test
+        void fullName_thoughDocWithParam() {
+
+            //given
+            var sampleRequest = Map.of(
+//                    "firstName", "Arina",
+                    "lastName", "Shyshkina"
+            );
+
+            //when
+            GraphQlTester.Response response = graphQlTester.documentName("fullNameJsonParam")
+                    .variable("sampleRequest", sampleRequest)
+                    .execute();
+            //then
+            response.errors()
+                    .satisfy(errors -> assertThat(errors)
+                                    .hasSize(1)
+                                    .allSatisfy(error -> assertAll(
+//                                    () -> assertThat(error).isInstanceOf(ValidationError.class),
+                                                    () -> assertThat(error.getMessage().toLowerCase()).contains("firstname", "valid"))
+                                    )
+                    );
         }
     }
 

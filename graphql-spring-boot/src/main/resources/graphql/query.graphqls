@@ -6,6 +6,6 @@ type Query {
 }
 
 input SampleRequest{
-        firstName: String
+        firstName: String!
         lastName: String
 }
