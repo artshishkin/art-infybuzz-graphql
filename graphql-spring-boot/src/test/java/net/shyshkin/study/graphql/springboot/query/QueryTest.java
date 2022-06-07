@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
+import java.util.Map;
+
 @Slf4j
 //@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 //@AutoConfigureGraphQlTester
@@ -125,7 +127,7 @@ class QueryTest {
     }
 
     @Nested
-    class WithInputDataTests{
+    class WithInputDataTests {
         @Test
         void fullName() {
 
@@ -158,8 +160,8 @@ class QueryTest {
 
             //when
             GraphQlTester.Response response = graphQlTester.documentName("fullNameParam")
-                    .variable("firstName","Nazar")
-                    .variable("lastName","Shyshkin")
+                    .variable("firstName", "Nazar")
+                    .variable("lastName", "Shyshkin")
                     .execute();
             //then
             response.path("fullName")
@@ -167,4 +169,59 @@ class QueryTest {
                     .isEqualTo("Nazar Shyshkin");
         }
     }
+
+    @Nested
+    class WithInputJsonDataTests {
+        @Test
+        void fullName() {
+
+            //given
+            String fullNameQuery = "{\n" +
+                    "fullNameJson(sampleRequest:{\n" +
+                    "    firstName:\"Art\"\n" +
+                    "    lastName:\"Shyshkin\"\n" +
+                    "  })\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+            response.path("fullNameJson")
+                    .entity(String.class)
+                    .isEqualTo("Art Shyshkin");
+        }
+
+        @Test
+        void fullName_thoughDoc() {
+
+            //when
+            GraphQlTester.Response response = graphQlTester.documentName("fullNameJson")
+                    .execute();
+            //then
+            response.path("fullNameJson")
+                    .entity(String.class)
+                    .isEqualTo("Art Shyshkin");
+        }
+
+        @Test
+        void fullName_thoughDocWithParam() {
+
+            //given
+            var sampleRequest = Map.of(
+                    "firstName", "Arina",
+                    "lastName", "Shyshkina"
+            );
+
+            //when
+            GraphQlTester.Response response = graphQlTester.documentName("fullNameJsonParam")
+                    .variable("sampleRequest", sampleRequest)
+                    .execute();
+            //then
+            response.path("fullNameJson")
+                    .entity(String.class)
+                    .isEqualTo("Arina Shyshkina");
+        }
+    }
+
 }

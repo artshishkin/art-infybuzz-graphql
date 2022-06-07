@@ -5,4 +5,10 @@ type Query {
         firstName: String
         lastName: String
     ) : String
+    fullNameJson (sampleRequest: SampleRequest) : String
+}
+
+input SampleRequest{
+        firstName: String
+        lastName: String
 }

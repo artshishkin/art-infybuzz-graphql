@@ -1,6 +1,7 @@
 package net.shyshkin.study.graphql.gettingstarted.query;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+import net.shyshkin.study.graphql.gettingstarted.request.SampleRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,5 +17,9 @@ public class Query implements GraphQLQueryResolver {
 
     public String fullName(String firstName, String lastName) {
         return firstName + " " + lastName;
+    }
+
+    public String fullNameJson(SampleRequest sampleRequest) {
+        return sampleRequest.getFirstName() + " " + sampleRequest.getLastName();
     }
 }
