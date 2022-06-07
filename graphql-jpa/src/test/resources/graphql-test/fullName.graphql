@@ -1,0 +1,3 @@
+query {
+    fullName(firstName:"Kate",lastName:"Shyshkina")
+}

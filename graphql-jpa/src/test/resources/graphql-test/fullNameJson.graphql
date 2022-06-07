@@ -1,0 +1,6 @@
+query{
+    fullNameJson(sampleRequest:{
+        firstName:"Art"
+        lastName:"Shyshkin"
+    })
+}

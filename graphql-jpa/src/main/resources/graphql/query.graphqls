@@ -1,0 +1,11 @@
+type Query {
+    firstQuery : String
+    secondQuery : String
+    fullName (firstName: String, lastName: String) : String
+    fullNameJson (sampleRequest: SampleRequest) : String
+}
+
+input SampleRequest{
+        firstName: String!
+        lastName: String
+}

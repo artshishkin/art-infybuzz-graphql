@@ -1,0 +1,3 @@
+query($sampleRequest: SampleRequest) {
+    fullNameJson(sampleRequest:$sampleRequest)
+}
