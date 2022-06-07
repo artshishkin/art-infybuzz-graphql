@@ -18,6 +18,7 @@
     <modules>
         <module>rest-api-jpa</module>
         <module>graphql-getting-started</module>
+        <module>graphql-spring-boot</module>
     </modules>
 
     <properties>
