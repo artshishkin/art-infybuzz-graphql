@@ -16,7 +16,7 @@
     <description>Tutorial - GraphQL API with Java Spring Boot and Spring Framework - from Infybuzz (Udemy)</description>
 
     <modules>
-        <module>getting-started</module>
+        <module>rest-api-jpa</module>
     </modules>
 
     <properties>
