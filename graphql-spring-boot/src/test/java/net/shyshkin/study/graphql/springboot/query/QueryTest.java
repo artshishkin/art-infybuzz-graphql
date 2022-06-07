@@ -70,4 +70,49 @@ class QueryTest {
                 .entity(String.class)
                 .isEqualTo("Second Query");
     }
+
+    @Test
+    void firstQuery_throughDocument() {
+
+        //when
+        GraphQlTester.Response response = graphQlTester.documentName("firstQueryDoc")
+                .execute();
+
+        //then
+        response.path("firstQuery")
+                .entity(String.class)
+                .isEqualTo("First Query");
+    }
+
+    @Test
+    void secondQuery_throughDocument() {
+
+        //when
+        GraphQlTester.Response response = graphQlTester.documentName("secondQueryDoc")
+                .execute();
+
+        //then
+        response.path("firstQuery")
+                .pathDoesNotExist();
+        response.path("secondQuery")
+                .entity(String.class)
+                .isEqualTo("Second Query");
+    }
+
+    @Test
+    void bothFirstAndSecondQueries_throughDocument() {
+
+        //when
+        GraphQlTester.Response response = graphQlTester.documentName("bothQueriesDoc")
+                .execute();
+
+        //then
+        response.path("firstQuery")
+                .entity(String.class)
+                .isEqualTo("First Query");
+        response.path("secondQuery")
+                .entity(String.class)
+                .isEqualTo("Second Query");
+    }
+
 }
