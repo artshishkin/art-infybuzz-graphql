@@ -123,4 +123,48 @@ class QueryTest {
                     .isEqualTo("Second Query");
         }
     }
+
+    @Nested
+    class WithInputDataTests{
+        @Test
+        void fullName() {
+
+            //given
+            String fullNameQuery = "{fullName(firstName:\"Art\",lastName:\"Shyshkin\")}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+            response.path("fullName")
+                    .entity(String.class)
+                    .isEqualTo("Art Shyshkin");
+        }
+
+        @Test
+        void fullName_thoughDoc() {
+
+            //when
+            GraphQlTester.Response response = graphQlTester.documentName("fullName")
+                    .execute();
+            //then
+            response.path("fullName")
+                    .entity(String.class)
+                    .isEqualTo("Kate Shyshkina");
+        }
+
+        @Test
+        void fullName_thoughDocWithParam() {
+
+            //when
+            GraphQlTester.Response response = graphQlTester.documentName("fullNameParam")
+                    .variable("firstName","Nazar")
+                    .variable("lastName","Shyshkin")
+                    .execute();
+            //then
+            response.path("fullName")
+                    .entity(String.class)
+                    .isEqualTo("Nazar Shyshkin");
+        }
+    }
 }

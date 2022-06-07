@@ -1,0 +1,3 @@
+query($firstName: String,$lastName:String) {
+    fullName(firstName:$firstName,lastName:$lastName)
+}
