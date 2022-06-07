@@ -8,3 +8,12 @@ spring:
     graphiql:
       enabled: true
       path: /app-ui
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:23306/graphql_db
+    username: graphql_user
+    password: graphql_password
+
+
+
+
