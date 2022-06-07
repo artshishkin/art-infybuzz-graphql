@@ -1,3 +1,10 @@
 logging:
   level:
     net.shyshkin: debug
+
+spring:
+  graphql:
+    path: /student-service
+    graphiql:
+      enabled: true
+      path: /app-ui
