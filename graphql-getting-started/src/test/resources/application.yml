@@ -1,0 +1,27 @@
+logging:
+  level:
+    net.shyshkin: debug
+#    org.hibernate.stat: debug
+#    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+
+graphiql:
+  mapping: /app-ui
+  endpoint: /student-service
+graphql:
+  servlet:
+    mapping: /student-service
+
+spring:
+  jpa:
+    show-sql: on
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+#        generate_statistics: true
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MYSQL
+    username: sa
+    password:
