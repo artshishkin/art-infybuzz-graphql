@@ -7,7 +7,6 @@ import net.shyshkin.study.graphql.gettingstarted.request.SampleRequest;
 import net.shyshkin.study.graphql.gettingstarted.response.StudentResponse;
 import net.shyshkin.study.graphql.gettingstarted.service.StudentService;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -31,7 +30,6 @@ public class Query implements GraphQLQueryResolver {
         return sampleRequest.getFirstName() + " " + sampleRequest.getLastName();
     }
 
-    @Transactional
     public StudentResponse student(long id) {
         Student student = studentService.getStudentById(id);
         return new StudentResponse(student);

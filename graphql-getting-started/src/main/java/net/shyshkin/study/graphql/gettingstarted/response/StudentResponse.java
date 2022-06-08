@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.shyshkin.study.graphql.gettingstarted.entity.Student;
-import net.shyshkin.study.graphql.gettingstarted.entity.Subject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -37,12 +35,12 @@ public class StudentResponse {
 		this.street = student.getAddress().getStreet();
 		this.city = student.getAddress().getCity();
 		
-		if (student.getLearningSubjects() != null) {
-			learningSubjects = new ArrayList<SubjectResponse>();
-			for (Subject subject: student.getLearningSubjects()) {
-				learningSubjects.add(new SubjectResponse(subject));
-			}
-		}
+//		if (student.getLearningSubjects() != null) {
+//			learningSubjects = new ArrayList<SubjectResponse>();
+//			for (Subject subject: student.getLearningSubjects()) {
+//				learningSubjects.add(new SubjectResponse(subject));
+//			}
+//		}
 	}
 
 }
