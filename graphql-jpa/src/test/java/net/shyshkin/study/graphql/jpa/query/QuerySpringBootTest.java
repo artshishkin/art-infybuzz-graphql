@@ -309,7 +309,7 @@ class QuerySpringBootTest {
             response.path("student")
                     .entity(StudentResponse.class)
                     .satisfies(st -> assertAll(
-                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects"),
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
                             () -> assertThat(st.getId()).isEqualTo(1L),
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("John"),
@@ -345,7 +345,7 @@ class QuerySpringBootTest {
             response.path("student")
                     .entity(StudentResponse.class)
                     .satisfies(st -> assertAll(
-                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects"),
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
                             () -> assertThat(st.getId()).isEqualTo(1L),
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("John"),
@@ -397,21 +397,38 @@ class QuerySpringBootTest {
         void getStudent_thoughDocWithParam() {
 
             //when
-            GraphQlTester.Response response = graphQlTester.documentName("studentById")
+            GraphQlTester.Response response = graphQlTester.documentName("studentByIdFlex")
                     .variable("studentId", 1L)
                     .execute();
             //then
+            response.path("student.city").pathDoesNotExist();
+            response.path("student.street").pathDoesNotExist();
+            response.path("student.email").pathDoesNotExist();
+
             response.path("student")
                     .entity(StudentResponse.class)
                     .satisfies(st -> assertAll(
-                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects"),
                             () -> assertThat(st.getId()).isEqualTo(1L),
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("John"),
                             () -> assertThat(st.getLastName()).isEqualTo("Smith"),
-                            () -> assertThat(st.getCity()).isEqualTo("Delhi"),
-                            () -> assertThat(st.getStreet()).isEqualTo("Happy Street"),
-                            () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com")
+                            () -> assertThat(st.getCity()).isNull(),
+                            () -> assertThat(st.getStreet()).isNull(),
+                            () -> assertThat(st.getEmail()).isNull(),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(2)
+                                    .anySatisfy(subResp->assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("id",1L)
+                                            .hasFieldOrPropertyWithValue("subjectName","Java")
+                                            .hasFieldOrPropertyWithValue("marksObtained",80.00)
+                                    )
+                                    .anySatisfy(subResp->assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("id",2L)
+                                            .hasFieldOrPropertyWithValue("subjectName","MySQL")
+                                            .hasFieldOrPropertyWithValue("marksObtained",70.00)
+                                    )
                     ));
         }
     }

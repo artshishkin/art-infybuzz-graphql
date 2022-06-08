@@ -3,9 +3,6 @@ query($studentId: Long) {
         id
         firstName
         lastName
-        email
-        street
-        city
         learningSubjects {
             id
             subjectName

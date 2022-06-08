@@ -337,7 +337,7 @@ class QueryTest {
             response.path("student")
                     .entity(StudentResponse.class)
                     .satisfies(st -> assertAll(
-                            () -> assertThat(st).hasNoNullFieldsOrProperties(),
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
                             () -> assertThat(st.getId()).isEqualTo(123L),
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("FirstMock"),
@@ -367,7 +367,7 @@ class QueryTest {
             response.path("student")
                     .entity(StudentResponse.class)
                     .satisfies(st -> assertAll(
-                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects"),
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
                             () -> assertThat(st.getId()).isEqualTo(123L),
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("FirstMock"),
