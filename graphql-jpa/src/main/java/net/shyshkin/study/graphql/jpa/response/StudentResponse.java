@@ -15,7 +15,7 @@ public class StudentResponse {
 
 	private long id;
 
-	@JsonProperty("first_name")
+	@JsonProperty("firstName")
 	private String firstName;
 
 	private String lastName;

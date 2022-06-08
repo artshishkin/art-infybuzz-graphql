@@ -1,25 +1,43 @@
 package net.shyshkin.study.graphql.jpa.query;
 
 import lombok.extern.slf4j.Slf4j;
+import net.shyshkin.study.graphql.jpa.config.ScalarConfig;
+import net.shyshkin.study.graphql.jpa.entity.Address;
+import net.shyshkin.study.graphql.jpa.entity.Student;
+import net.shyshkin.study.graphql.jpa.response.StudentResponse;
+import net.shyshkin.study.graphql.jpa.service.StudentService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.graphql.test.tester.GraphQlTester;
+import org.springframework.test.context.ContextConfiguration;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 
 @Slf4j
 //@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 //@AutoConfigureGraphQlTester
 @GraphQlTest
+@ContextConfiguration(classes = {ScalarConfig.class, Query.class})
 class QueryTest {
 
     @Autowired
     private GraphQlTester graphQlTester;
+
+    @MockBean
+    StudentService studentService;
 
     @Nested
     class WithInlinedDocumentTests {
@@ -276,6 +294,93 @@ class QueryTest {
                                     )
                     );
         }
+    }
+
+    @Nested
+    class GetStudentByIdMockTests {
+
+        @BeforeEach
+        void setUp() {
+            given(studentService.getStudentById(anyLong())).willReturn(mockStudent());
+        }
+
+        @AfterEach
+        void tearDown() {
+            then(studentService).should().getStudentById(eq(123L));
+        }
+
+        @Test
+        void getStudent() {
+
+            //given
+            String fullNameQuery = "query{\n" +
+                    "  student(id:123) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects"),
+                            () -> assertThat(st.getId()).isEqualTo(123L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("FirstMock"),
+                            () -> assertThat(st.getLastName()).isEqualTo("LastMock"),
+                            () -> assertThat(st.getCity()).isEqualTo("Volodymyr"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Zymnivska"),
+                            () -> assertThat(st.getEmail()).isEqualTo("mock@gmail.com")
+                    ));
+        }
+
+        @Test
+        void getStudent_thoughDocWithParam() {
+
+            //when
+            GraphQlTester.Response response = graphQlTester.documentName("studentById")
+                    .variable("studentId", 123L)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects"),
+                            () -> assertThat(st.getId()).isEqualTo(123L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("FirstMock"),
+                            () -> assertThat(st.getLastName()).isEqualTo("LastMock"),
+                            () -> assertThat(st.getCity()).isEqualTo("Volodymyr"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Zymnivska"),
+                            () -> assertThat(st.getEmail()).isEqualTo("mock@gmail.com")
+                    ));
+        }
+
+        private Student mockStudent() {
+            Student mock = Student.builder()
+                    .id(123L)
+                    .firstName("FirstMock")
+                    .lastName("LastMock")
+                    .address(Address.builder()
+                            .id(321L)
+                            .city("Volodymyr")
+                            .street("Zymnivska")
+                            .build())
+                    .email("mock@gmail.com")
+                    .learningSubjects(List.of())
+                    .build();
+            mock.getAddress().setStudent(mock);
+            return mock;
+        }
+
     }
 
 }

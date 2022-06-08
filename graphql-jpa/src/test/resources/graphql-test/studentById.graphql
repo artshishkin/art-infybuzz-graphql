@@ -1,0 +1,10 @@
+query($studentId: Long) {
+    student(id:$studentId){
+        id
+        firstName
+        lastName
+        email
+        street
+        city
+    }
+}
