@@ -338,4 +338,63 @@ class QuerySpringBootTest {
         }
     }
 
+    @Nested
+    class ResponseFlexibilityTests {
+
+        @Test
+        void getStudent() {
+
+            //given
+            String studentQuery = "query{\n" +
+                    "  student(id:1) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(studentQuery)
+                    .execute();
+            //then
+            response.path("student.city").pathDoesNotExist();
+            response.path("student.street").pathDoesNotExist();
+            response.path("student.email").pathDoesNotExist();
+            response.path("student.firstName").hasValue();
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st.getId()).isEqualTo(1L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("John"),
+                            () -> assertThat(st.getLastName()).isEqualTo("Smith"),
+                            () -> assertThat(st.getCity()).isNull(),
+                            () -> assertThat(st.getStreet()).isNull(),
+                            () -> assertThat(st.getEmail()).isNull()
+                    ));
+        }
+
+        @Test
+        void getStudent_thoughDocWithParam() {
+
+            //when
+            GraphQlTester.Response response = graphQlTester.documentName("studentById")
+                    .variable("studentId", 1L)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects"),
+                            () -> assertThat(st.getId()).isEqualTo(1L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("John"),
+                            () -> assertThat(st.getLastName()).isEqualTo("Smith"),
+                            () -> assertThat(st.getCity()).isEqualTo("Delhi"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Happy Street"),
+                            () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com")
+                    ));
+        }
+    }
+
 }

@@ -364,23 +364,69 @@ class QueryTest {
                     ));
         }
 
-        private Student mockStudent() {
-            Student mock = Student.builder()
-                    .id(123L)
-                    .firstName("FirstMock")
-                    .lastName("LastMock")
-                    .address(Address.builder()
-                            .id(321L)
-                            .city("Volodymyr")
-                            .street("Zymnivska")
-                            .build())
-                    .email("mock@gmail.com")
-                    .learningSubjects(List.of())
-                    .build();
-            mock.getAddress().setStudent(mock);
-            return mock;
+    }
+
+    @Nested
+    class ResponseFlexibilityTests {
+
+        @BeforeEach
+        void setUp() {
+            given(studentService.getStudentById(anyLong())).willReturn(mockStudent());
         }
 
+        @AfterEach
+        void tearDown() {
+            then(studentService).should().getStudentById(eq(123L));
+        }
+
+        @Test
+        void getStudent() {
+
+            //given
+            String studentQuery = "query{\n" +
+                    "  student(id:123) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(studentQuery)
+                    .execute();
+            //then
+            response.path("student.city").pathDoesNotExist();
+            response.path("student.street").pathDoesNotExist();
+            response.path("student.email").pathDoesNotExist();
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st.getId()).isEqualTo(123L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("FirstMock"),
+                            () -> assertThat(st.getLastName()).isEqualTo("LastMock"),
+                            () -> assertThat(st.getCity()).isNull(),
+                            () -> assertThat(st.getStreet()).isNull(),
+                            () -> assertThat(st.getEmail()).isNull()
+                    ));
+        }
+    }
+
+    private Student mockStudent() {
+        Student mock = Student.builder()
+                .id(123L)
+                .firstName("FirstMock")
+                .lastName("LastMock")
+                .address(Address.builder()
+                        .id(321L)
+                        .city("Volodymyr")
+                        .street("Zymnivska")
+                        .build())
+                .email("mock@gmail.com")
+                .learningSubjects(List.of())
+                .build();
+        mock.getAddress().setStudent(mock);
+        return mock;
     }
 
 }
