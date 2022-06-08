@@ -1,11 +1,24 @@
+scalar Long
+
 type Query {
     firstQuery : String
     secondQuery : String
     fullName (firstName: String, lastName: String) : String
     fullNameJson (sampleRequest: SampleRequest) : String
+    student (id: Long): StudentResponse
 }
 
 input SampleRequest{
         firstName: String!
         lastName: String
 }
+
+type StudentResponse{
+    id: Long
+    firstName: String
+    lastName: String
+    email: String
+    street: String
+    city: String
+}
+
