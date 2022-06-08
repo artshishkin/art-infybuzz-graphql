@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.shyshkin.study.graphql.jpa.config.ScalarConfig;
 import net.shyshkin.study.graphql.jpa.entity.Address;
 import net.shyshkin.study.graphql.jpa.entity.Student;
+import net.shyshkin.study.graphql.jpa.entity.Subject;
 import net.shyshkin.study.graphql.jpa.response.StudentResponse;
 import net.shyshkin.study.graphql.jpa.service.StudentService;
 import org.junit.jupiter.api.AfterEach;
@@ -321,6 +322,11 @@ class QueryTest {
                     "    email\n" +
                     "    street\n" +
                     "    city\n" +
+                    "    learningSubjects {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
                     "  }\n" +
                     "}";
 
@@ -331,14 +337,22 @@ class QueryTest {
             response.path("student")
                     .entity(StudentResponse.class)
                     .satisfies(st -> assertAll(
-                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects"),
+                            () -> assertThat(st).hasNoNullFieldsOrProperties(),
                             () -> assertThat(st.getId()).isEqualTo(123L),
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("FirstMock"),
                             () -> assertThat(st.getLastName()).isEqualTo("LastMock"),
                             () -> assertThat(st.getCity()).isEqualTo("Volodymyr"),
                             () -> assertThat(st.getStreet()).isEqualTo("Zymnivska"),
-                            () -> assertThat(st.getEmail()).isEqualTo("mock@gmail.com")
+                            () -> assertThat(st.getEmail()).isEqualTo("mock@gmail.com"),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(1)
+                                    .allSatisfy(subResp->assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("id",234L)
+                                            .hasFieldOrPropertyWithValue("subjectName","GraphQL")
+                                            .hasFieldOrPropertyWithValue("marksObtained",90.00)
+                                    )
                     ));
         }
 
@@ -423,9 +437,16 @@ class QueryTest {
                         .street("Zymnivska")
                         .build())
                 .email("mock@gmail.com")
-                .learningSubjects(List.of())
+                .learningSubjects(List.of(
+                        Subject.builder()
+                                .id(234L)
+                                .marksObtained(90.00)
+                                .subjectName("GraphQL")
+                                .build()
+                ))
                 .build();
         mock.getAddress().setStudent(mock);
+        mock.getLearningSubjects().get(0).setStudent(mock);
         return mock;
     }
 

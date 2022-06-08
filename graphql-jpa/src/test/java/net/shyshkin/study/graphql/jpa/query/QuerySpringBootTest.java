@@ -294,6 +294,11 @@ class QuerySpringBootTest {
                     "    email\n" +
                     "    street\n" +
                     "    city\n" +
+                    "    learningSubjects {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
                     "  }\n" +
                     "}";
 
@@ -311,7 +316,21 @@ class QuerySpringBootTest {
                             () -> assertThat(st.getLastName()).isEqualTo("Smith"),
                             () -> assertThat(st.getCity()).isEqualTo("Delhi"),
                             () -> assertThat(st.getStreet()).isEqualTo("Happy Street"),
-                            () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com")
+                            () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com"),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(2)
+                                    .anySatisfy(subResp->assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("id",1L)
+                                            .hasFieldOrPropertyWithValue("subjectName","Java")
+                                            .hasFieldOrPropertyWithValue("marksObtained",80.00)
+                                    )
+                                    .anySatisfy(subResp->assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("id",2L)
+                                            .hasFieldOrPropertyWithValue("subjectName","MySQL")
+                                            .hasFieldOrPropertyWithValue("marksObtained",70.00)
+                                    )
                     ));
         }
 
