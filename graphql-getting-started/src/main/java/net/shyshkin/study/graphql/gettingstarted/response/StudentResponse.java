@@ -29,6 +29,8 @@ public class StudentResponse {
 
 	private List<SubjectResponse> learningSubjects;
 
+	private String fullName;
+
 	public StudentResponse (Student student) {
 		this.student = student;
 		this.id = student.getId();

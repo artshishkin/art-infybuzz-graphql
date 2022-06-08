@@ -182,6 +182,7 @@ class QuerySpringBootTest {
                     "    email\n" +
                     "    street\n" +
                     "    city\n" +
+                    "    fullName\n" +
                     "    learningSubjects {\n" +
                     "      id\n" +
                     "      subjectName\n" +
@@ -210,6 +211,7 @@ class QuerySpringBootTest {
                             () -> assertThat(st.getCity()).isEqualTo("Delhi"),
                             () -> assertThat(st.getStreet()).isEqualTo("Happy Street"),
                             () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com"),
+                            () -> assertThat(st.getFullName()).isEqualTo("John Smith"),
                             () -> assertThat(st.getLearningSubjects())
                                     .hasSize(2)
                                     .anySatisfy(subResp -> assertThat(subResp)
