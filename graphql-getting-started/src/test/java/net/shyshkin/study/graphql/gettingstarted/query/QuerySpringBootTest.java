@@ -202,7 +202,7 @@ class QuerySpringBootTest {
 
             assertThat(studentResponse)
                     .satisfies(st -> assertAll(
-                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects"),
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects","student"),
                             () -> assertThat(st.getId()).isEqualTo(1L),
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("John"),
