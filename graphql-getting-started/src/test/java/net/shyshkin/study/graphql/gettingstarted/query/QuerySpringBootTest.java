@@ -380,6 +380,66 @@ class QuerySpringBootTest {
                     ));
         }
 
+        @Test
+        void getStudent_withAllSubjects() throws JsonProcessingException {
+
+            //given
+            String studentQuery = "query{\n" +
+                    "  student(id:1) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    fullName\n" +
+                    "    learningSubjects  (subjectNameFilter: All) {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+            var req = Map.of("query", studentQuery);
+
+            //when
+            ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity("/student-service", req, JsonNode.class);
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            var json = responseEntity.getBody();
+            log.debug("{}", json);
+            StudentResponse studentResponse = objectMapper.readValue(json.at("/data/student").toString(), StudentResponse.class);
+
+            assertThat(studentResponse)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects", "student"),
+                            () -> assertThat(st.getId()).isEqualTo(1L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("John"),
+                            () -> assertThat(st.getLastName()).isEqualTo("Smith"),
+                            () -> assertThat(st.getCity()).isEqualTo("Delhi"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Happy Street"),
+                            () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com"),
+                            () -> assertThat(st.getFullName()).isEqualTo("John Smith"),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(2)
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("id", 1L)
+                                            .hasFieldOrPropertyWithValue("subjectName", "Java")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 80.00)
+                                    )
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("id", 2L)
+                                            .hasFieldOrPropertyWithValue("subjectName", "MySQL")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 70.00)
+                                    )
+                    ));
+        }
+
+
     }
 
 }
