@@ -21,7 +21,7 @@ type StudentResponse{
     email: String
     street: String
     city: String
-    learningSubjects(subjectNameFilter: SubjectNameFilter): [SubjectResponse]
+    learningSubjects(subjectNameFilters: [SubjectNameFilter]): [SubjectResponse]
     fullName: String
 }
 
