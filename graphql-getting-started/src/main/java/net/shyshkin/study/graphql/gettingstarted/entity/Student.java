@@ -1,6 +1,7 @@
 package net.shyshkin.study.graphql.gettingstarted.entity;
 
 import lombok.*;
+import net.shyshkin.study.graphql.gettingstarted.request.CreateStudentRequest;
 
 import javax.persistence.*;
 import java.util.List;
@@ -35,5 +36,11 @@ public class Student {
 
     @OneToMany(mappedBy = "student")
     private List<Subject> learningSubjects;
+
+    public Student(CreateStudentRequest createStudentRequest) {
+        this.firstName = createStudentRequest.getFirstName();
+        this.lastName = createStudentRequest.getLastName();
+        this.email = createStudentRequest.getEmail();
+    }
 
 }
