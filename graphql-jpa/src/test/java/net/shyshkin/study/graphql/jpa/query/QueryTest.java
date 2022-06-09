@@ -7,10 +7,9 @@ import net.shyshkin.study.graphql.jpa.entity.Student;
 import net.shyshkin.study.graphql.jpa.entity.Subject;
 import net.shyshkin.study.graphql.jpa.response.StudentResponse;
 import net.shyshkin.study.graphql.jpa.service.StudentService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -352,7 +351,7 @@ class QueryTest {
                                     .allSatisfy(subResp -> assertThat(subResp)
                                             .hasNoNullFieldsOrProperties()
                                             .hasFieldOrPropertyWithValue("id", 234L)
-                                            .hasFieldOrPropertyWithValue("subjectName", "GraphQL")
+                                            .hasFieldOrPropertyWithValue("subjectName", "Java")
                                             .hasFieldOrPropertyWithValue("marksObtained", 90.00)
                                     )
                     ));
@@ -430,6 +429,119 @@ class QueryTest {
         }
     }
 
+    @Nested
+    class GetStudentFilteredTests {
+
+        @BeforeEach
+        void setUp() {
+            given(studentService.getStudentById(anyLong())).willReturn(mockStudent());
+        }
+
+        @AfterEach
+        void tearDown() {
+            then(studentService).should().getStudentById(eq(123L));
+        }
+
+        @Test
+        void getStudent_subjectAbsent() {
+
+            //given
+            String subjectName = "MongoDB";
+            String fullNameQuery = "query{\n" +
+                    "  student(id:123) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    fullName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects (subjectNameFilters: [" + subjectName + "]) {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isEqualTo(123L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("FirstMock"),
+                            () -> assertThat(st.getLastName()).isEqualTo("LastMock"),
+                            () -> assertThat(st.getFullName()).isEqualTo("FirstMock LastMock"),
+                            () -> assertThat(st.getCity()).isEqualTo("Volodymyr"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Zymnivska"),
+                            () -> assertThat(st.getEmail()).isEqualTo("mock@gmail.com"),
+                            () -> assertThat(st.getLearningSubjects()).isEmpty()
+                    ));
+        }
+
+        @ParameterizedTest(name = "{0}")
+        @CsvSource(value = {
+                "present value, then it should be present in learningSubjects field|[ Java ]",
+                "[All] value filter then there should be all the learning subjects|[ All ]",
+                "null filter (absent filtering) then there should be all the learning subjects|null",
+                "Multiple filter values then all should be present in learningSubjects field|[Java,MySQL]",
+        },
+                delimiter = '|'
+        )
+        @DisplayName("Filter learning subjects with")
+        void getStudent_filters(String testDescription, String filtersPattern) {
+
+            //given
+            String fullNameQuery = "query{\n" +
+                    "  student(id:123) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    fullName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects (subjectNameFilters: " + filtersPattern + ") {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isEqualTo(123L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("FirstMock"),
+                            () -> assertThat(st.getLastName()).isEqualTo("LastMock"),
+                            () -> assertThat(st.getFullName()).isEqualTo("FirstMock LastMock"),
+                            () -> assertThat(st.getCity()).isEqualTo("Volodymyr"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Zymnivska"),
+                            () -> assertThat(st.getEmail()).isEqualTo("mock@gmail.com"),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(1)
+                                    .allSatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("id", 234L)
+                                            .hasFieldOrPropertyWithValue("subjectName", "Java")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 90.00)
+                                    )
+                    ));
+        }
+    }
+
     private Student mockStudent() {
         Student mock = Student.builder()
                 .id(123L)
@@ -445,7 +557,7 @@ class QueryTest {
                         Subject.builder()
                                 .id(234L)
                                 .marksObtained(90.00)
-                                .subjectName("GraphQL")
+                                .subjectName("Java")
                                 .build()
                 ))
                 .build();
