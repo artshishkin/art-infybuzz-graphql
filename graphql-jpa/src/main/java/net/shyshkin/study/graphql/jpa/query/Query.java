@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.shyshkin.study.graphql.jpa.entity.Student;
 import net.shyshkin.study.graphql.jpa.entity.Subject;
+import net.shyshkin.study.graphql.jpa.filter.SubjectNameFilter;
 import net.shyshkin.study.graphql.jpa.request.SampleRequest;
 import net.shyshkin.study.graphql.jpa.response.StudentResponse;
 import net.shyshkin.study.graphql.jpa.response.SubjectResponse;
@@ -14,7 +15,11 @@ import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Controller
@@ -50,13 +55,26 @@ public class Query {
     }
 
     @SchemaMapping(typeName = "StudentResponse", field = "learningSubjects")
-    public List<SubjectResponse> getLearningSubjects(StudentResponse studentResponse) {
+    public List<SubjectResponse> getLearningSubjects(StudentResponse studentResponse, @Argument List<SubjectNameFilter> subjectNameFilters) {
         log.debug("getLearningSubjects for {}", studentResponse);
         var learningSubjects = new ArrayList<SubjectResponse>();
         Student student = studentResponse.getStudent();
+
+        List<String> filterNameList = Stream
+                .ofNullable(subjectNameFilters)
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .map(SubjectNameFilter::name)
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+
+        boolean filterIsOff = subjectNameFilters == null ||
+                filterNameList.contains(SubjectNameFilter.All.name().toLowerCase());
+
         if (student.getLearningSubjects() != null) {
             for (Subject subject : student.getLearningSubjects()) {
-                learningSubjects.add(new SubjectResponse(subject));
+                if (filterIsOff || filterNameList.contains(subject.getSubjectName().toLowerCase()))
+                    learningSubjects.add(new SubjectResponse(subject));
             }
         }
         return learningSubjects;

@@ -20,7 +20,7 @@ type StudentResponse{
     email: String
     street: String
     city: String
-    learningSubjects: [SubjectResponse]
+    learningSubjects(subjectNameFilters: [SubjectNameFilter]): [SubjectResponse]
     fullName: String
 }
 
@@ -30,3 +30,9 @@ type SubjectResponse{
      marksObtained: Float
 }
 
+enum SubjectNameFilter{
+    All
+    Java
+    MySQL
+    MongoDB
+}
