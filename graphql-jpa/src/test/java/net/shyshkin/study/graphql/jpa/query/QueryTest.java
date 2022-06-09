@@ -319,6 +319,7 @@ class QueryTest {
                     "    id\n" +
                     "    firstName\n" +
                     "    lastName\n" +
+                    "    fullName\n" +
                     "    email\n" +
                     "    street\n" +
                     "    city\n" +
@@ -342,16 +343,17 @@ class QueryTest {
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("FirstMock"),
                             () -> assertThat(st.getLastName()).isEqualTo("LastMock"),
+                            () -> assertThat(st.getFullName()).isEqualTo("FirstMock LastMock"),
                             () -> assertThat(st.getCity()).isEqualTo("Volodymyr"),
                             () -> assertThat(st.getStreet()).isEqualTo("Zymnivska"),
                             () -> assertThat(st.getEmail()).isEqualTo("mock@gmail.com"),
                             () -> assertThat(st.getLearningSubjects())
                                     .hasSize(1)
-                                    .allSatisfy(subResp->assertThat(subResp)
+                                    .allSatisfy(subResp -> assertThat(subResp)
                                             .hasNoNullFieldsOrProperties()
-                                            .hasFieldOrPropertyWithValue("id",234L)
-                                            .hasFieldOrPropertyWithValue("subjectName","GraphQL")
-                                            .hasFieldOrPropertyWithValue("marksObtained",90.00)
+                                            .hasFieldOrPropertyWithValue("id", 234L)
+                                            .hasFieldOrPropertyWithValue("subjectName", "GraphQL")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 90.00)
                                     )
                     ));
         }
@@ -372,6 +374,7 @@ class QueryTest {
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("FirstMock"),
                             () -> assertThat(st.getLastName()).isEqualTo("LastMock"),
+                            () -> assertThat(st.getFullName()).isEqualTo("FirstMock LastMock"),
                             () -> assertThat(st.getCity()).isEqualTo("Volodymyr"),
                             () -> assertThat(st.getStreet()).isEqualTo("Zymnivska"),
                             () -> assertThat(st.getEmail()).isEqualTo("mock@gmail.com")
@@ -419,6 +422,7 @@ class QueryTest {
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("FirstMock"),
                             () -> assertThat(st.getLastName()).isEqualTo("LastMock"),
+                            () -> assertThat(st.getFullName()).isNull(),
                             () -> assertThat(st.getCity()).isNull(),
                             () -> assertThat(st.getStreet()).isNull(),
                             () -> assertThat(st.getEmail()).isNull()

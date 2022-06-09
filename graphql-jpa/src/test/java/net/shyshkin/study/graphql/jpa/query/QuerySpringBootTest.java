@@ -291,6 +291,7 @@ class QuerySpringBootTest {
                     "    id\n" +
                     "    firstName\n" +
                     "    lastName\n" +
+                    "    fullName\n" +
                     "    email\n" +
                     "    street\n" +
                     "    city\n" +
@@ -314,6 +315,7 @@ class QuerySpringBootTest {
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("John"),
                             () -> assertThat(st.getLastName()).isEqualTo("Smith"),
+                            () -> assertThat(st.getFullName()).isEqualTo("John Smith"),
                             () -> assertThat(st.getCity()).isEqualTo("Delhi"),
                             () -> assertThat(st.getStreet()).isEqualTo("Happy Street"),
                             () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com"),
@@ -350,6 +352,7 @@ class QuerySpringBootTest {
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("John"),
                             () -> assertThat(st.getLastName()).isEqualTo("Smith"),
+                            () -> assertThat(st.getFullName()).isEqualTo("John Smith"),
                             () -> assertThat(st.getCity()).isEqualTo("Delhi"),
                             () -> assertThat(st.getStreet()).isEqualTo("Happy Street"),
                             () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com")
@@ -387,6 +390,7 @@ class QuerySpringBootTest {
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("John"),
                             () -> assertThat(st.getLastName()).isEqualTo("Smith"),
+                            () -> assertThat(st.getFullName()).isNull(),
                             () -> assertThat(st.getCity()).isNull(),
                             () -> assertThat(st.getStreet()).isNull(),
                             () -> assertThat(st.getEmail()).isNull()
@@ -412,6 +416,7 @@ class QuerySpringBootTest {
                             () -> log.debug("{}", st),
                             () -> assertThat(st.getFirstName()).isEqualTo("John"),
                             () -> assertThat(st.getLastName()).isEqualTo("Smith"),
+                            () -> assertThat(st.getFullName()).isEqualTo("John Smith"),
                             () -> assertThat(st.getCity()).isNull(),
                             () -> assertThat(st.getStreet()).isNull(),
                             () -> assertThat(st.getEmail()).isNull(),

@@ -30,6 +30,8 @@ public class StudentResponse {
 	@ToString.Exclude
 	private Student student;
 
+	private String fullName;
+
 	public StudentResponse (Student student) {
 		this.student = student;
 		this.id = student.getId();

@@ -62,4 +62,10 @@ public class Query {
         return learningSubjects;
     }
 
+    @SchemaMapping(typeName = "StudentResponse", field = "fullName")
+    public String resolveFullName(StudentResponse response) {
+        if (response == null) return null;
+        return response.getFirstName() + " " + response.getLastName();
+    }
+
 }
