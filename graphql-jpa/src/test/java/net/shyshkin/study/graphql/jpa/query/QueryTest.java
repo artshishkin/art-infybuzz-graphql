@@ -542,6 +542,58 @@ class QueryTest {
         }
     }
 
+    @Nested
+    class GetStudentFilteredWithNullTests {
+
+        @AfterEach
+        void tearDown() {
+            then(studentService).shouldHaveNoInteractions();
+        }
+
+        @ParameterizedTest(name = "{0}")
+        @CsvSource(value = {
+                "filters having null value filter should have validation error|[Java,null,MySQL]",
+        },
+                delimiter = '|'
+        )
+        @DisplayName("Filter learning subjects with")
+        void getStudent_filters(String testDescription, String filtersPattern) {
+
+            //given
+            String fullNameQuery = "query{\n" +
+                    "  student(id:123) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    fullName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects (subjectNameFilters: " + filtersPattern + ") {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+//            response.path("student").pathDoesNotExist();
+            response.errors()
+                    .satisfy(errors -> assertThat(errors)
+                            .hasSize(1)
+                            .allSatisfy(error -> assertAll(
+//                                    () -> assertThat(error).isInstanceOf(ValidationError.class),
+                                    () -> log.debug("{}", error),
+                                    () -> assertThat(error.getMessage()).contains("Validation error of type WrongType", "must not be null"))
+                            )
+                    );
+        }
+    }
+
     private Student mockStudent() {
         Student mock = Student.builder()
                 .id(123L)

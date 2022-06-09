@@ -20,7 +20,7 @@ type StudentResponse{
     email: String
     street: String
     city: String
-    learningSubjects(subjectNameFilters: [SubjectNameFilter]): [SubjectResponse]
+    learningSubjects(subjectNameFilters: [SubjectNameFilter!]): [SubjectResponse]
     fullName: String
 }
 
