@@ -616,4 +616,82 @@ class QuerySpringBootTest {
 
     }
 
+    @Nested
+    class CreateStudentTests {
+
+        @Test
+        void createStudent() throws JsonProcessingException {
+
+            //given
+            String createStudentQuery = "mutation{\n" +
+                    "  createStudent(createStudentRequest:{\n" +
+                    "    firstName:\"Kate\"\n" +
+                    "    lastName:\"Shyshkina\"\n" +
+                    "    email:\"kate@gmail.com\"\n" +
+                    "    street:\"Nekrasova\"\n" +
+                    "    city:\"Kramatorsk\"\n" +
+                    "    subjectsLearning:[\n" +
+                    "      {\n" +
+                    "        subjectName:\"MySQL\"\n" +
+                    "        marksObtained:67.0\n" +
+                    "      },\n" +
+                    "      {\n" +
+                    "        subjectName:\"MongoDB\"\n" +
+                    "        marksObtained:85\n" +
+                    "      }\n" +
+                    "    ]\n" +
+                    "  }) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "    fullName\n" +
+                    "  }\n" +
+                    "}";
+            var req = Map.of("query", createStudentQuery);
+
+            //when
+            ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity("/student-service", req, JsonNode.class);
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            var json = responseEntity.getBody();
+            log.debug("{}", json);
+            StudentResponse studentResponse = objectMapper.readValue(json.at("/data/createStudent").toString(), StudentResponse.class);
+
+            assertThat(studentResponse)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isGreaterThanOrEqualTo(1L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("Kate"),
+                            () -> assertThat(st.getLastName()).isEqualTo("Shyshkina"),
+                            () -> assertThat(st.getCity()).isEqualTo("Kramatorsk"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Nekrasova"),
+                            () -> assertThat(st.getEmail()).isEqualTo("kate@gmail.com"),
+                            () -> assertThat(st.getFullName()).isEqualTo("Kate Shyshkina"),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(2)
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("subjectName", "MySQL")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 67.0)
+                                    )
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("subjectName", "MongoDB")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 85.0)
+                                    )
+                    ));
+        }
+
+    }
+
 }
