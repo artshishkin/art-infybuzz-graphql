@@ -581,7 +581,6 @@ class QueryTest {
             GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
                     .execute();
             //then
-//            response.path("student").pathDoesNotExist();
             response.errors()
                     .satisfy(errors -> assertThat(errors)
                             .hasSize(1)

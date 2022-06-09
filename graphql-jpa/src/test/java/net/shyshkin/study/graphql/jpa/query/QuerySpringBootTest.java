@@ -2,6 +2,7 @@ package net.shyshkin.study.graphql.jpa.query;
 
 import lombok.extern.slf4j.Slf4j;
 import net.shyshkin.study.graphql.jpa.response.StudentResponse;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -321,17 +322,17 @@ class QuerySpringBootTest {
                             () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com"),
                             () -> assertThat(st.getLearningSubjects())
                                     .hasSize(2)
-                                    .anySatisfy(subResp->assertThat(subResp)
+                                    .anySatisfy(subResp -> assertThat(subResp)
                                             .hasNoNullFieldsOrProperties()
-                                            .hasFieldOrPropertyWithValue("id",1L)
-                                            .hasFieldOrPropertyWithValue("subjectName","Java")
-                                            .hasFieldOrPropertyWithValue("marksObtained",80.00)
+                                            .hasFieldOrPropertyWithValue("id", 1L)
+                                            .hasFieldOrPropertyWithValue("subjectName", "Java")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 80.00)
                                     )
-                                    .anySatisfy(subResp->assertThat(subResp)
+                                    .anySatisfy(subResp -> assertThat(subResp)
                                             .hasNoNullFieldsOrProperties()
-                                            .hasFieldOrPropertyWithValue("id",2L)
-                                            .hasFieldOrPropertyWithValue("subjectName","MySQL")
-                                            .hasFieldOrPropertyWithValue("marksObtained",70.00)
+                                            .hasFieldOrPropertyWithValue("id", 2L)
+                                            .hasFieldOrPropertyWithValue("subjectName", "MySQL")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 70.00)
                                     )
                     ));
         }
@@ -422,20 +423,289 @@ class QuerySpringBootTest {
                             () -> assertThat(st.getEmail()).isNull(),
                             () -> assertThat(st.getLearningSubjects())
                                     .hasSize(2)
-                                    .anySatisfy(subResp->assertThat(subResp)
+                                    .anySatisfy(subResp -> assertThat(subResp)
                                             .hasNoNullFieldsOrProperties()
-                                            .hasFieldOrPropertyWithValue("id",1L)
-                                            .hasFieldOrPropertyWithValue("subjectName","Java")
-                                            .hasFieldOrPropertyWithValue("marksObtained",80.00)
+                                            .hasFieldOrPropertyWithValue("id", 1L)
+                                            .hasFieldOrPropertyWithValue("subjectName", "Java")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 80.00)
                                     )
-                                    .anySatisfy(subResp->assertThat(subResp)
+                                    .anySatisfy(subResp -> assertThat(subResp)
                                             .hasNoNullFieldsOrProperties()
-                                            .hasFieldOrPropertyWithValue("id",2L)
-                                            .hasFieldOrPropertyWithValue("subjectName","MySQL")
-                                            .hasFieldOrPropertyWithValue("marksObtained",70.00)
+                                            .hasFieldOrPropertyWithValue("id", 2L)
+                                            .hasFieldOrPropertyWithValue("subjectName", "MySQL")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 70.00)
                                     )
                     ));
         }
     }
+
+    @Nested
+    class GetStudentFilteredTests {
+
+        @Test
+        void getStudent_subjectPresent() {
+
+            //given
+            String subjectName = "Java";
+            String fullNameQuery = "query{\n" +
+                    "  student(id:1) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    fullName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects (subjectNameFilters: [" + subjectName + "]) {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isEqualTo(1L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("John"),
+                            () -> assertThat(st.getLastName()).isEqualTo("Smith"),
+                            () -> assertThat(st.getFullName()).isEqualTo("John Smith"),
+                            () -> assertThat(st.getCity()).isEqualTo("Delhi"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Happy Street"),
+                            () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com"),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(1)
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("id", 1L)
+                                            .hasFieldOrPropertyWithValue("subjectName", "Java")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 80.00)
+                                    )
+                    ));
+        }
+
+        @Test
+        void getStudent_subjectAbsent() {
+
+            //given
+            String subjectName = "MongoDB";
+            String fullNameQuery = "query{\n" +
+                    "  student(id:1) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    fullName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects (subjectNameFilters: [" + subjectName + "]) {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isEqualTo(1L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("John"),
+                            () -> assertThat(st.getLastName()).isEqualTo("Smith"),
+                            () -> assertThat(st.getFullName()).isEqualTo("John Smith"),
+                            () -> assertThat(st.getCity()).isEqualTo("Delhi"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Happy Street"),
+                            () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com"),
+                            () -> assertThat(st.getLearningSubjects()).isEmpty()
+                    ));
+        }
+
+        @Test
+        void getStudent_withAllSubjects() {
+
+            //given
+            String fullNameQuery = "query{\n" +
+                    "  student(id:1) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    fullName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects (subjectNameFilters: [All]) {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isEqualTo(1L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("John"),
+                            () -> assertThat(st.getLastName()).isEqualTo("Smith"),
+                            () -> assertThat(st.getFullName()).isEqualTo("John Smith"),
+                            () -> assertThat(st.getCity()).isEqualTo("Delhi"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Happy Street"),
+                            () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com"),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(2)
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("id", 1L)
+                                            .hasFieldOrPropertyWithValue("subjectName", "Java")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 80.00)
+                                    )
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("id", 2L)
+                                            .hasFieldOrPropertyWithValue("subjectName", "MySQL")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 70.00)
+                                    )
+                    ));
+        }
+
+        @Test
+        void getStudent_withNullFilter() {
+
+            //given
+            String fullNameQuery = "query{\n" +
+                    "  student(id:2) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    fullName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects (subjectNameFilters: null) {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isEqualTo(2L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(3)
+                                    .allSatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                    )
+                    ));
+        }
+
+        @Test
+        void getStudent_withMultipleFilterValues() {
+
+            //given
+            String fullNameQuery = "query{\n" +
+                    "  student(id:2) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    fullName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects (subjectNameFilters: [Java,MongoDB]) {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isEqualTo(2L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(2)
+                                    .allSatisfy(subResp -> assertAll(
+                                                    () -> assertThat(subResp).hasNoNullFieldsOrProperties(),
+                                                    () -> assertThat(subResp.getSubjectName()).isIn("Java", "MongoDB")
+                                            )
+                                    )
+                    ));
+        }
+
+        @Test
+        @DisplayName("When there is null value in list of filters it should return validation error")
+        void getStudent_withMultipleFilterValuesAndPresentNull() {
+
+            //given
+            String fullNameQuery = "query{\n" +
+                    "  student(id:2) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    fullName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects (subjectNameFilters: [Java,null,MongoDB]) {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(fullNameQuery)
+                    .execute();
+            //then
+            response.errors()
+                    .satisfy(errors -> assertThat(errors)
+                                    .hasSize(1)
+                                    .allSatisfy(error -> assertAll(
+//                                    () -> assertThat(error).isInstanceOf(ValidationError.class),
+                                                    () -> log.debug("{}", error),
+                                                    () -> assertThat(error.getMessage()).contains("Validation error of type WrongType", "must not be null"))
+                                    )
+                    );
+        }
+
+
+    }
+
 
 }
