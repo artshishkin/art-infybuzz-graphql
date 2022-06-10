@@ -1,7 +1,6 @@
 package net.shyshkin.study.graphql.jpa.entity;
 
 import lombok.*;
-import net.shyshkin.study.graphql.jpa.request.CreateStudentRequest;
 
 import javax.persistence.*;
 import java.util.List;
@@ -30,11 +29,11 @@ public class Student {
     @Column(name = "email")
     private String email;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
     private Address address;
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Subject> learningSubjects;
 
     public Student(CreateStudentRequest createStudentRequest) {
