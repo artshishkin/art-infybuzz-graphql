@@ -5,6 +5,9 @@ import net.shyshkin.study.graphql.jpa.config.ScalarConfig;
 import net.shyshkin.study.graphql.jpa.entity.Address;
 import net.shyshkin.study.graphql.jpa.entity.Student;
 import net.shyshkin.study.graphql.jpa.entity.Subject;
+import net.shyshkin.study.graphql.jpa.mapper.AddressMapperImpl;
+import net.shyshkin.study.graphql.jpa.mapper.StudentMapperImpl;
+import net.shyshkin.study.graphql.jpa.mapper.SubjectMapperImpl;
 import net.shyshkin.study.graphql.jpa.response.StudentResponse;
 import net.shyshkin.study.graphql.jpa.service.StudentService;
 import org.junit.jupiter.api.*;
@@ -30,7 +33,7 @@ import static org.mockito.BDDMockito.then;
 //@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 //@AutoConfigureGraphQlTester
 @GraphQlTest
-@ContextConfiguration(classes = {ScalarConfig.class, Query.class})
+@ContextConfiguration(classes = {ScalarConfig.class, Query.class, StudentMapperImpl.class, AddressMapperImpl.class, SubjectMapperImpl.class})
 class QueryTest {
 
     @Autowired
@@ -583,12 +586,12 @@ class QueryTest {
             //then
             response.errors()
                     .satisfy(errors -> assertThat(errors)
-                            .hasSize(1)
-                            .allSatisfy(error -> assertAll(
+                                    .hasSize(1)
+                                    .allSatisfy(error -> assertAll(
 //                                    () -> assertThat(error).isInstanceOf(ValidationError.class),
-                                    () -> log.debug("{}", error),
-                                    () -> assertThat(error.getMessage()).contains("Validation error of type WrongType", "must not be null"))
-                            )
+                                                    () -> log.debug("{}", error),
+                                                    () -> assertThat(error.getMessage()).contains("Validation error of type WrongType", "must not be null"))
+                                    )
                     );
         }
     }

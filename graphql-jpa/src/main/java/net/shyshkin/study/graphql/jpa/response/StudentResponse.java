@@ -32,22 +32,4 @@ public class StudentResponse {
 
 	private String fullName;
 
-	public StudentResponse (Student student) {
-		this.student = student;
-		this.id = student.getId();
-		this.firstName = student.getFirstName();
-		this.lastName = student.getLastName();
-		this.email = student.getEmail();
-
-		this.street = student.getAddress().getStreet();
-		this.city = student.getAddress().getCity();
-
-//		if (student.getLearningSubjects() != null) {
-//			learningSubjects = new ArrayList<SubjectResponse>();
-//			for (Subject subject: student.getLearningSubjects()) {
-//				learningSubjects.add(new SubjectResponse(subject));
-//			}
-//		}
-	}
-
 }

@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.shyshkin.study.graphql.jpa.entity.Student;
 import net.shyshkin.study.graphql.jpa.entity.Subject;
 import net.shyshkin.study.graphql.jpa.filter.SubjectNameFilter;
+import net.shyshkin.study.graphql.jpa.mapper.StudentMapper;
+import net.shyshkin.study.graphql.jpa.mapper.SubjectMapper;
 import net.shyshkin.study.graphql.jpa.request.SampleRequest;
 import net.shyshkin.study.graphql.jpa.response.StudentResponse;
 import net.shyshkin.study.graphql.jpa.response.SubjectResponse;
@@ -27,6 +29,8 @@ import java.util.stream.Stream;
 public class Query {
 
     private final StudentService studentService;
+    private final StudentMapper studentMapper;
+    private final SubjectMapper subjectMapper;
 
     @QueryMapping
     public String firstQuery() {
@@ -51,7 +55,7 @@ public class Query {
     @QueryMapping
     public StudentResponse student(@Argument long id) {
         Student student = studentService.getStudentById(id);
-        return new StudentResponse(student);
+        return studentMapper.toDto(student);
     }
 
     @SchemaMapping(typeName = "StudentResponse", field = "learningSubjects")
@@ -74,7 +78,7 @@ public class Query {
         if (student.getLearningSubjects() != null) {
             for (Subject subject : student.getLearningSubjects()) {
                 if (filterIsOff || filterNameList.contains(subject.getSubjectName().toLowerCase()))
-                    learningSubjects.add(new SubjectResponse(subject));
+                    learningSubjects.add(subjectMapper.toDto(subject));
             }
         }
         return learningSubjects;

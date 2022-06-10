@@ -5,6 +5,9 @@ import net.shyshkin.study.graphql.jpa.config.ScalarConfig;
 import net.shyshkin.study.graphql.jpa.entity.Address;
 import net.shyshkin.study.graphql.jpa.entity.Student;
 import net.shyshkin.study.graphql.jpa.entity.Subject;
+import net.shyshkin.study.graphql.jpa.mapper.AddressMapperImpl;
+import net.shyshkin.study.graphql.jpa.mapper.StudentMapperImpl;
+import net.shyshkin.study.graphql.jpa.mapper.SubjectMapperImpl;
 import net.shyshkin.study.graphql.jpa.query.Query;
 import net.shyshkin.study.graphql.jpa.request.CreateStudentRequest;
 import net.shyshkin.study.graphql.jpa.response.StudentResponse;
@@ -29,7 +32,7 @@ import static org.mockito.BDDMockito.then;
 
 @Slf4j
 @GraphQlTest
-@ContextConfiguration(classes = {ScalarConfig.class, Query.class, Mutation.class})
+@ContextConfiguration(classes = {ScalarConfig.class, Query.class, Mutation.class, StudentMapperImpl.class, AddressMapperImpl.class, SubjectMapperImpl.class})
 class MutationMockTest {
 
     @Autowired

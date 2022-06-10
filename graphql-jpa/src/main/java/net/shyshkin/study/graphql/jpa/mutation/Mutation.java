@@ -2,6 +2,7 @@ package net.shyshkin.study.graphql.jpa.mutation;
 
 import lombok.RequiredArgsConstructor;
 import net.shyshkin.study.graphql.jpa.entity.Student;
+import net.shyshkin.study.graphql.jpa.mapper.StudentMapper;
 import net.shyshkin.study.graphql.jpa.request.CreateStudentRequest;
 import net.shyshkin.study.graphql.jpa.response.StudentResponse;
 import net.shyshkin.study.graphql.jpa.service.StudentService;
@@ -14,11 +15,12 @@ import org.springframework.stereotype.Controller;
 public class Mutation {
 
     private final StudentService studentService;
+    private final StudentMapper studentMapper;
 
     @MutationMapping("createStudent")
     public StudentResponse createStudent(@Argument CreateStudentRequest createStudentRequest) {
         Student student = studentService.createStudent(createStudentRequest);
-        return new StudentResponse(student);
+        return studentMapper.toDto(student);
     }
 
 }
