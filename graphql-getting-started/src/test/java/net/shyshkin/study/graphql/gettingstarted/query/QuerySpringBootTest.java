@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import net.shyshkin.study.graphql.gettingstarted.request.CreateStudentRequest;
+import net.shyshkin.study.graphql.gettingstarted.request.CreateSubjectRequest;
 import net.shyshkin.study.graphql.gettingstarted.response.StudentResponse;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -743,6 +746,179 @@ class QuerySpringBootTest {
                             () -> log.debug("{}", st)
                     ));
         }
+    }
+
+    @Nested
+    class MutationWithVariableTests {
+
+        @Test
+        void createStudent_throughJson() throws JsonProcessingException {
+
+            //given
+            String variablesJson = "{\n" +
+                    "  \"createStReq\": {\n" +
+                    "    \"firstName\":\"Nazar\",\n" +
+                    "    \"lastName\":\"Shyshkin\",\n" +
+                    "    \"email\":\"nazar.shyshkin@gmail.com\",\n" +
+                    "    \"street\":\"Kramatorska\",\n" +
+                    "    \"city\":\"Lviv\",\n" +
+                    "    \"subjectsLearning\":[\n" +
+                    "      {\n" +
+                    "        \"subjectName\":\"MySQL\",\n" +
+                    "        \"marksObtained\":78.0\n" +
+                    "      },\n" +
+                    "      {\n" +
+                    "        \"subjectName\":\"Java\",\n" +
+                    "        \"marksObtained\":90\n" +
+                    "      }\n" +
+                    "    ]\n" +
+                    "  }\n" +
+                    "}";
+
+            log.debug("Variables JSON: {}", variablesJson);
+
+            String createStudentQuery = "mutation ($createStReq:CreateStudentRequest){\n" +
+                    "  createStudent(createStudentRequest: $createStReq) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "    fullName\n" +
+                    "  }\n" +
+                    "}";
+            var req = Map.of(
+                    "query", createStudentQuery,
+                    "variables", variablesJson
+            );
+
+            //when
+            ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity("/student-service", req, JsonNode.class);
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            var json = responseEntity.getBody();
+            log.debug("{}", json);
+            StudentResponse studentResponse = objectMapper.readValue(json.at("/data/createStudent").toString(), StudentResponse.class);
+
+            assertThat(studentResponse)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isGreaterThanOrEqualTo(1L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("Nazar"),
+                            () -> assertThat(st.getLastName()).isEqualTo("Shyshkin"),
+                            () -> assertThat(st.getCity()).isEqualTo("Lviv"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Kramatorska"),
+                            () -> assertThat(st.getEmail()).isEqualTo("nazar.shyshkin@gmail.com"),
+                            () -> assertThat(st.getFullName()).isEqualTo("Nazar Shyshkin"),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(2)
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("subjectName", "MySQL")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 78.0)
+                                    )
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("subjectName", "Java")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 90.0)
+                                    )
+                    ));
+        }
+
+        @Test
+        void createStudent_throughObject() throws JsonProcessingException {
+
+            //given
+            var createStudentRequest = CreateStudentRequest.builder()
+                    .firstName("Nazar")
+                    .lastName("Shyshkin")
+                    .email("nazar.shyshkin@gmail.com")
+                    .city("Lviv")
+                    .street("Kramatorska")
+                    .subjectsLearning(List.of(
+                            CreateSubjectRequest.builder()
+                                    .subjectName("MySQL")
+                                    .marksObtained(78.0)
+                                    .build(),
+                            CreateSubjectRequest.builder()
+                                    .subjectName("Java")
+                                    .marksObtained(90.0)
+                                    .build()
+                    ))
+                    .build();
+
+            var variables = Map.of(
+                    "createStReq", createStudentRequest
+            );
+
+            String variablesJson = objectMapper.writeValueAsString(variables);
+
+            log.debug("Variables JSON: {}", variablesJson);
+
+            String createStudentQuery = "mutation ($createStReq:CreateStudentRequest){\n" +
+                    "  createStudent(createStudentRequest: $createStReq) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "    fullName\n" +
+                    "  }\n" +
+                    "}";
+            var req = Map.of(
+                    "query", createStudentQuery,
+                    "variables", variablesJson
+            );
+
+            //when
+            ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity("/student-service", req, JsonNode.class);
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            var json = responseEntity.getBody();
+            log.debug("{}", json);
+            StudentResponse studentResponse = objectMapper.readValue(json.at("/data/createStudent").toString(), StudentResponse.class);
+
+            assertThat(studentResponse)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isGreaterThanOrEqualTo(1L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("Nazar"),
+                            () -> assertThat(st.getLastName()).isEqualTo("Shyshkin"),
+                            () -> assertThat(st.getCity()).isEqualTo("Lviv"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Kramatorska"),
+                            () -> assertThat(st.getEmail()).isEqualTo("nazar.shyshkin@gmail.com"),
+                            () -> assertThat(st.getFullName()).isEqualTo("Nazar Shyshkin"),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(2)
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("subjectName", "MySQL")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 78.0)
+                                    )
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("subjectName", "Java")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 90.0)
+                                    )
+                    ));
+        }
+
     }
 
 }
