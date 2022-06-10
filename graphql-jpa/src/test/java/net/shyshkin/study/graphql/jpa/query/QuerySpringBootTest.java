@@ -1,6 +1,7 @@
 package net.shyshkin.study.graphql.jpa.query;
 
 import lombok.extern.slf4j.Slf4j;
+import net.shyshkin.study.graphql.jpa.filter.SubjectNameFilter;
 import net.shyshkin.study.graphql.jpa.response.StudentResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureH
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -717,7 +719,7 @@ class QuerySpringBootTest {
         void queryVariable(long studentId) {
 
             //given
-            String queryWithVariable = "query ($studentId: Long){\n" +
+            String queryWithVariable = "query ($studentId: Long, $filters:[SubjectNameFilter!]){\n" +
                     "  student(id:$studentId) {\n" +
                     "    id\n" +
                     "    firstName\n" +
@@ -726,7 +728,7 @@ class QuerySpringBootTest {
                     "    email\n" +
                     "    street\n" +
                     "    city\n" +
-                    "    learningSubjects {\n" +
+                    "    learningSubjects(subjectNameFilters: $filters) {\n" +
                     "      id\n" +
                     "      subjectName\n" +
                     "      marksObtained\n" +
@@ -737,6 +739,7 @@ class QuerySpringBootTest {
             //when
             GraphQlTester.Response response = graphQlTester.document(queryWithVariable)
                     .variable("studentId", studentId)
+                    .variable("filters", List.of(SubjectNameFilter.Java))
                     .execute();
             //then
             response.path("student")
@@ -744,6 +747,8 @@ class QuerySpringBootTest {
                     .satisfies(st -> assertAll(
                             () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
                             () -> assertThat(st.getId()).isEqualTo(studentId),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .allSatisfy(sub->assertThat(sub.getSubjectName()).isEqualTo("Java")),
                             () -> log.debug("{}", st)
                     ));
         }
@@ -753,8 +758,9 @@ class QuerySpringBootTest {
         void queryVariable_throughDocWithParam(long studentId) {
 
             //when
-            GraphQlTester.Response response = graphQlTester.documentName("studentById")
+            GraphQlTester.Response response = graphQlTester.documentName("studentByIdVar")
                     .variable("studentId", studentId)
+                    .variable("filters", List.of(SubjectNameFilter.Java))
                     .execute();
             //then
             response.path("student")
@@ -762,6 +768,8 @@ class QuerySpringBootTest {
                     .satisfies(st -> assertAll(
                             () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
                             () -> assertThat(st.getId()).isEqualTo(studentId),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .allSatisfy(sub->assertThat(sub.getSubjectName()).isEqualTo("Java")),
                             () -> log.debug("{}", st)
                     ));
         }

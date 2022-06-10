@@ -707,7 +707,7 @@ class QuerySpringBootTest {
         void getStudent(long studentId) throws JsonProcessingException {
 
             //given
-            String queryWithVariable = "query student($studentId: Long){\n" +
+            String queryWithVariable = "query student($studentId: Long, $filters:[SubjectNameFilter!]){\n" +
                     "  student(id:$studentId) {\n" +
                     "    id\n" +
                     "    firstName\n" +
@@ -716,7 +716,7 @@ class QuerySpringBootTest {
                     "    email\n" +
                     "    street\n" +
                     "    city\n" +
-                    "    learningSubjects {\n" +
+                    "    learningSubjects (subjectNameFilters: $filters) {\n" +
                     "      id\n" +
                     "      subjectName\n" +
                     "      marksObtained\n" +
@@ -724,7 +724,9 @@ class QuerySpringBootTest {
                     "  }\n" +
                     "}";
 
-            String variableValue = "{\"studentId\":" + studentId + "}";
+            String variableValue = "{\"studentId\":" + studentId + "," +
+                    "\"filters\":[\"Java\"]"+
+                    "}";
             var req = Map.of(
                     "query", queryWithVariable,
                     "variables", variableValue
@@ -743,6 +745,8 @@ class QuerySpringBootTest {
                     .satisfies(st -> assertAll(
                             () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects", "student"),
                             () -> assertThat(st.getId()).isEqualTo(studentId),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .allSatisfy(sub->assertThat(sub.getSubjectName()).isEqualTo("Java")),
                             () -> log.debug("{}", st)
                     ));
         }
