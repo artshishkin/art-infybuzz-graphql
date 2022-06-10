@@ -36,10 +36,4 @@ public class Student {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Subject> learningSubjects;
 
-    public Student(CreateStudentRequest createStudentRequest) {
-        this.firstName = createStudentRequest.getFirstName();
-        this.lastName = createStudentRequest.getLastName();
-        this.email = createStudentRequest.getEmail();
-    }
-
 }
