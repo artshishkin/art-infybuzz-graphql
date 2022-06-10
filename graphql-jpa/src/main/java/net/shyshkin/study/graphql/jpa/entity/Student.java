@@ -1,13 +1,15 @@
 package net.shyshkin.study.graphql.jpa.entity;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
@@ -36,4 +38,18 @@ public class Student {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Subject> learningSubjects;
 
+    public Student(Long id, String firstName, String lastName, String email, Address address, List<Subject> learningSubjects) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        setAddress(address);
+        this.learningSubjects = learningSubjects;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+        if (address != null && address.getStudent() != this)
+            address.setStudent(this);
+    }
 }

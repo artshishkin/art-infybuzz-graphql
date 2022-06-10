@@ -6,7 +6,7 @@ import net.shyshkin.study.graphql.jpa.response.StudentResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(uses = {AddressMapper.class})
+@Mapper
 public interface StudentMapper {
 
     @Mapping(target = "address", source = "request")

@@ -24,7 +24,8 @@ public class Address {
 
 	@Column(name = "city")
 	private String city;
-	
+
+	@ToString.Exclude
 	@OneToOne(mappedBy = "address")
 	private Student student;
 
