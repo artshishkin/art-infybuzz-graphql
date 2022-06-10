@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.shyshkin.study.graphql.gettingstarted.response.StudentResponse;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -692,6 +694,55 @@ class QuerySpringBootTest {
                     ));
         }
 
+    }
+
+    @Nested
+    class QueryVariableTests {
+
+        @ParameterizedTest
+        @ValueSource(longs = {1L, 2L, 3L})
+        void getStudent(long studentId) throws JsonProcessingException {
+
+            //given
+            String queryWithVariable = "query student($studentId: Long){\n" +
+                    "  student(id:$studentId) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    fullName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+
+            String variableValue = "{\"studentId\":" + studentId + "}";
+            var req = Map.of(
+                    "query", queryWithVariable,
+                    "variables", variableValue
+            );
+
+            //when
+            ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity("/student-service", req, JsonNode.class);
+
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            var json = responseEntity.getBody();
+            log.debug("{}", json);
+            StudentResponse studentResponse = objectMapper.readValue(json.at("/data/student").toString(), StudentResponse.class);
+
+            assertThat(studentResponse)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects", "student"),
+                            () -> assertThat(st.getId()).isEqualTo(studentId),
+                            () -> log.debug("{}", st)
+                    ));
+        }
     }
 
 }
