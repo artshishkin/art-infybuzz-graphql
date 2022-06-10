@@ -44,12 +44,19 @@ public class Student {
         this.lastName = lastName;
         this.email = email;
         setAddress(address);
-        this.learningSubjects = learningSubjects;
+        setLearningSubjects(learningSubjects);
     }
 
     public void setAddress(Address address) {
         this.address = address;
         if (address != null && address.getStudent() != this)
             address.setStudent(this);
+    }
+
+    public void setLearningSubjects(List<Subject> learningSubjects) {
+        this.learningSubjects = learningSubjects;
+        if (learningSubjects != null) {
+            learningSubjects.forEach(subject -> subject.setStudent(this));
+        }
     }
 }

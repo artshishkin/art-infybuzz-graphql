@@ -6,10 +6,11 @@ import net.shyshkin.study.graphql.jpa.response.StudentResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper
+@Mapper(uses = SubjectMapper.class)
 public interface StudentMapper {
 
     @Mapping(target = "address", source = "request")
+    @Mapping(target = "learningSubjects", source = "subjectsLearning")
     Student toEntity(CreateStudentRequest request);
 
     @Mapping(target = "id", source = "id")
