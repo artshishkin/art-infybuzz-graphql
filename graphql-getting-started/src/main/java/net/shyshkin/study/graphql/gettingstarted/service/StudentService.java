@@ -1,68 +1,53 @@
 package net.shyshkin.study.graphql.gettingstarted.service;
 
+import lombok.RequiredArgsConstructor;
 import net.shyshkin.study.graphql.gettingstarted.entity.Address;
 import net.shyshkin.study.graphql.gettingstarted.entity.Student;
 import net.shyshkin.study.graphql.gettingstarted.entity.Subject;
-import net.shyshkin.study.graphql.gettingstarted.repository.AddressRepository;
 import net.shyshkin.study.graphql.gettingstarted.repository.StudentRepository;
-import net.shyshkin.study.graphql.gettingstarted.repository.SubjectRepository;
 import net.shyshkin.study.graphql.gettingstarted.request.CreateStudentRequest;
-import net.shyshkin.study.graphql.gettingstarted.request.CreateSubjectRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class StudentService {
 
-    @Autowired
-    StudentRepository studentRepository;
-
-    @Autowired
-    AddressRepository addressRepository;
-
-    @Autowired
-    SubjectRepository subjectRepository;
+    private final StudentRepository studentRepository;
 
     public Student getStudentById(long id) {
         return studentRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
-    public Student createStudent (CreateStudentRequest createStudentRequest) {
+    public Student createStudent(CreateStudentRequest createStudentRequest) {
 
-        Student student = new Student(createStudentRequest);
+        Student student = Student.builder()
+                .firstName(createStudentRequest.getFirstName())
+                .lastName(createStudentRequest.getLastName())
+                .email(createStudentRequest.getEmail())
+                .address(Address.builder()
+                        .street(createStudentRequest.getStreet())
+                        .city(createStudentRequest.getCity())
+                        .build())
+                .build();
 
-        Address address = new Address();
-        address.setStreet(createStudentRequest.getStreet());
-        address.setCity(createStudentRequest.getCity());
-
-        address = addressRepository.save(address);
-
-        student.setAddress(address);
-        student = studentRepository.save(student);
-
-        List<Subject> subjectsList = new ArrayList<Subject>();
-
-        if(createStudentRequest.getSubjectsLearning() != null) {
-            for (CreateSubjectRequest createSubjectRequest :
-                    createStudentRequest.getSubjectsLearning()) {
-                Subject subject = new Subject();
-                subject.setSubjectName(createSubjectRequest.getSubjectName());
-                subject.setMarksObtained(createSubjectRequest.getMarksObtained());
-                subject.setStudent(student);
-
-                subjectsList.add(subject);
-            }
-
-            subjectRepository.saveAll(subjectsList);
-
-        }
+        List<Subject> subjectsList = Optional.ofNullable(createStudentRequest.getSubjectsLearning())
+                .stream()
+                .flatMap(Collection::stream)
+                .map(createSubjectRequest -> Subject.builder()
+                        .subjectName(createSubjectRequest.getSubjectName())
+                        .marksObtained(createSubjectRequest.getMarksObtained())
+                        .student(student)
+                        .build())
+                .collect(Collectors.toList());
 
         student.setLearningSubjects(subjectsList);
 
-        return student;
+        return studentRepository.save(student);
     }
 }
