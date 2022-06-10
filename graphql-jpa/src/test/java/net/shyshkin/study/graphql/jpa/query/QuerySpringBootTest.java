@@ -5,6 +5,8 @@ import net.shyshkin.study.graphql.jpa.response.StudentResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureHttpGraphQlTester;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -707,5 +709,98 @@ class QuerySpringBootTest {
 
     }
 
+    @Nested
+    class QueryVariableTests {
+
+        @ParameterizedTest
+        @ValueSource(longs = {1L, 2L, 3L})
+        void queryVariable(long studentId) {
+
+            //given
+            String queryWithVariable = "query ($studentId: Long){\n" +
+                    "  student(id:$studentId) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    fullName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(queryWithVariable)
+                    .variable("studentId", studentId)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isEqualTo(studentId),
+                            () -> log.debug("{}", st)
+                    ));
+        }
+
+        @ParameterizedTest
+        @ValueSource(longs = {1L, 2L, 3L})
+        void queryVariable_throughDocWithParam(long studentId) {
+
+            //when
+            GraphQlTester.Response response = graphQlTester.documentName("studentById")
+                    .variable("studentId", studentId)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isEqualTo(studentId),
+                            () -> log.debug("{}", st)
+                    ));
+        }
+
+        @ParameterizedTest
+        @ValueSource(longs = {1L, 2L, 3L})
+        void queryVariable_withAdditionalQueryName(long studentId) {
+
+            //given
+            String queryWithVariable = "query student($studentId: Long){\n" +
+                    "  student(id:$studentId) {\n" +
+                    "    id\n" +
+                    "    firstName\n" +
+                    "    lastName\n" +
+                    "    fullName\n" +
+                    "    email\n" +
+                    "    street\n" +
+                    "    city\n" +
+                    "    learningSubjects {\n" +
+                    "      id\n" +
+                    "      subjectName\n" +
+                    "      marksObtained\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+
+            //when
+            GraphQlTester.Response response = graphQlTester.document(queryWithVariable)
+                    .variable("studentId", studentId)
+                    .execute();
+            //then
+            response.path("student")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isEqualTo(studentId),
+                            () -> log.debug("{}", st)
+                    ));
+        }
+    }
 
 }
