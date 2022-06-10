@@ -2,7 +2,6 @@ package net.shyshkin.study.graphql.jpa.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.shyshkin.study.graphql.jpa.entity.Address;
 import net.shyshkin.study.graphql.jpa.entity.Student;
 import net.shyshkin.study.graphql.jpa.entity.Subject;
 import net.shyshkin.study.graphql.jpa.mapper.AddressMapper;
@@ -35,10 +34,8 @@ public class StudentService {
     public Student createStudent(CreateStudentRequest createStudentRequest) {
 
         Student student = studentMapper.toEntity(createStudentRequest);
-        Address address = addressMapper.toEntity(createStudentRequest);
 
-        student.setAddress(address);
-        address.setStudent(student);
+        student.getAddress().setStudent(student);
 
         List<Subject> subjectsList = Optional.ofNullable(createStudentRequest.getSubjectsLearning())
                 .stream()
