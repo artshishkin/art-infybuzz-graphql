@@ -1,6 +1,9 @@
 package net.shyshkin.study.graphql.jpa.mutation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import net.shyshkin.study.graphql.jpa.request.CreateStudentRequest;
+import net.shyshkin.study.graphql.jpa.request.CreateSubjectRequest;
 import net.shyshkin.study.graphql.jpa.response.StudentResponse;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureHttpGraphQlTester;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.graphql.test.tester.GraphQlTester;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -92,4 +97,66 @@ class MutationSpringBootTest {
                     ));
         }
     }
+
+    @Nested
+    class MutationWithVariableTests {
+
+        @Test
+        void createStudent_throughObject() throws JsonProcessingException {
+
+            //given
+            var createStudentRequest = CreateStudentRequest.builder()
+                    .firstName("Nazar")
+                    .lastName("Shyshkin")
+                    .email("nazar.shyshkin@gmail.com")
+                    .city("Lviv")
+                    .street("Kramatorska")
+                    .subjectsLearning(List.of(
+                            CreateSubjectRequest.builder()
+                                    .subjectName("MySQL")
+                                    .marksObtained(78.0)
+                                    .build(),
+                            CreateSubjectRequest.builder()
+                                    .subjectName("Java")
+                                    .marksObtained(90.0)
+                                    .build()
+                    ))
+                    .build();
+
+            //when
+            GraphQlTester.Response response = graphQlTester
+                    .documentName("createStudent")
+                    .variable("createStReq", createStudentRequest)
+                    .execute();
+
+            //then
+            response.path("createStudent")
+                    .entity(StudentResponse.class)
+                    .satisfies(st -> assertAll(
+                            () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                            () -> assertThat(st.getId()).isGreaterThanOrEqualTo(1L),
+                            () -> log.debug("{}", st),
+                            () -> assertThat(st.getFirstName()).isEqualTo("Nazar"),
+                            () -> assertThat(st.getLastName()).isEqualTo("Shyshkin"),
+                            () -> assertThat(st.getCity()).isEqualTo("Lviv"),
+                            () -> assertThat(st.getStreet()).isEqualTo("Kramatorska"),
+                            () -> assertThat(st.getEmail()).isEqualTo("nazar.shyshkin@gmail.com"),
+                            () -> assertThat(st.getFullName()).isEqualTo("Nazar Shyshkin"),
+                            () -> assertThat(st.getLearningSubjects())
+                                    .hasSize(2)
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("subjectName", "MySQL")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 78.0)
+                                    )
+                                    .anySatisfy(subResp -> assertThat(subResp)
+                                            .hasNoNullFieldsOrProperties()
+                                            .hasFieldOrPropertyWithValue("subjectName", "Java")
+                                            .hasFieldOrPropertyWithValue("marksObtained", 90.0)
+                                    )
+                    ));
+        }
+
+    }
+
 }
