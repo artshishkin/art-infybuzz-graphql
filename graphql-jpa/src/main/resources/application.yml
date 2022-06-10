@@ -10,9 +10,9 @@ spring:
       path: /app-ui
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:23306/graphql_db
-    username: graphql_user
-    password: graphql_password
+    url: ${DATABASE_URL:jdbc:mysql://localhost:23306/graphql_db}
+    username: ${DATABASE_USERNAME:graphql_user}
+    password: ${DATABASE_PASSWORD:graphql_password}
   jpa:
     show-sql: on
     hibernate:
