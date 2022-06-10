@@ -1,24 +1,20 @@
 package net.shyshkin.study.graphql.gettingstarted.service;
 
 import lombok.RequiredArgsConstructor;
-import net.shyshkin.study.graphql.gettingstarted.entity.Address;
 import net.shyshkin.study.graphql.gettingstarted.entity.Student;
-import net.shyshkin.study.graphql.gettingstarted.entity.Subject;
+import net.shyshkin.study.graphql.gettingstarted.mapper.StudentMapper;
 import net.shyshkin.study.graphql.gettingstarted.repository.StudentRepository;
 import net.shyshkin.study.graphql.gettingstarted.request.CreateStudentRequest;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class StudentService {
 
     private final StudentRepository studentRepository;
+    private final StudentMapper studentMapper;
 
     public Student getStudentById(long id) {
         return studentRepository.findById(id).orElseThrow(EntityNotFoundException::new);
@@ -26,27 +22,7 @@ public class StudentService {
 
     public Student createStudent(CreateStudentRequest createStudentRequest) {
 
-        Student student = Student.builder()
-                .firstName(createStudentRequest.getFirstName())
-                .lastName(createStudentRequest.getLastName())
-                .email(createStudentRequest.getEmail())
-                .address(Address.builder()
-                        .street(createStudentRequest.getStreet())
-                        .city(createStudentRequest.getCity())
-                        .build())
-                .build();
-
-        List<Subject> subjectsList = Optional.ofNullable(createStudentRequest.getSubjectsLearning())
-                .stream()
-                .flatMap(Collection::stream)
-                .map(createSubjectRequest -> Subject.builder()
-                        .subjectName(createSubjectRequest.getSubjectName())
-                        .marksObtained(createSubjectRequest.getMarksObtained())
-                        .student(student)
-                        .build())
-                .collect(Collectors.toList());
-
-        student.setLearningSubjects(subjectsList);
+        Student student = studentMapper.toEntity(createStudentRequest);
 
         return studentRepository.save(student);
     }

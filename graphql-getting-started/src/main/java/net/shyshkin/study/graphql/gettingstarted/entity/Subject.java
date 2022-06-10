@@ -27,5 +27,6 @@ public class Subject {
 	
 	@ManyToOne
 	@JoinColumn(name = "student_id")
+	@ToString.Exclude
 	private Student student;
 }
