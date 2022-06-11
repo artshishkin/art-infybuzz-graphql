@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import net.shyshkin.study.graphql.clientlegacy.response.StudentResponse;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class ClientService {
@@ -14,8 +16,8 @@ public class ClientService {
 
     public StudentResponse getStudent(Long id) {
 
-        String request = "query{\n" +
-                "  student(id:" + id + ") {\n" +
+        String request = "query student($studentId: Long){\n" +
+                "  student(id: $studentId) {\n" +
                 "    id\n" +
                 "    firstName\n" +
                 "    lastName\n" +
@@ -33,6 +35,7 @@ public class ClientService {
 
         var graphQLRequest = GraphQLRequest.builder()
                 .query(request)
+                .variables(Map.of("studentId", id))
                 .build();
         return client.post(graphQLRequest)
                 .map(resp -> resp.get("student", StudentResponse.class))
