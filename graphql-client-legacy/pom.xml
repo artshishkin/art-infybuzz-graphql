@@ -1,33 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.0</version>
+        <version>2.6.7</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>net.shyshkin.study.graphql</groupId>
-    <artifactId>art-infybuzz-graphql</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    <name>art-infybuzz-graphql</name>
-    <description>Tutorial - GraphQL API with Java Spring Boot and Spring Framework - from Infybuzz (Udemy)</description>
+    <modelVersion>4.0.0</modelVersion>
 
-    <modules>
-        <module>rest-api-jpa</module>
-        <module>graphql-getting-started</module>
-        <module>graphql-spring-boot</module>
-        <module>graphql-jpa</module>
-        <module>graphql-client-legacy</module>
-    </modules>
+    <groupId>net.shyshkin.study.graphql</groupId>
+    <artifactId>graphql-client-legacy</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
 
     <properties>
         <java.version>11</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
         <mapstruct.version>1.5.0.Final</mapstruct.version>
     </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -38,11 +36,26 @@
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.graphql-java-kickstart</groupId>
+            <artifactId>graphql-webclient-spring-boot-starter</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -185,21 +198,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>com.heroku.sdk</groupId>
-                <artifactId>heroku-maven-plugin</artifactId>
-                <version>3.0.4</version>
-                <configuration>
-                    <appName>art-infybuzz-graphql</appName>
-                    <jdkVersion>11</jdkVersion>
-                    <processTypes>
-                        <web>
-                            java -Dserver.port=$PORT $JAVA_OPTS -jar target/${project.build.finalName}.jar
-                        </web>
-                    </processTypes>
-                </configuration>
             </plugin>
 
         </plugins>
