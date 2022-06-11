@@ -1,6 +1,6 @@
 package net.shyshkin.study.graphql.gettingstarted.query;
 
-import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+import graphql.kickstart.tools.GraphQLQueryResolver;
 import lombok.RequiredArgsConstructor;
 import net.shyshkin.study.graphql.gettingstarted.entity.Student;
 import net.shyshkin.study.graphql.gettingstarted.request.SampleRequest;

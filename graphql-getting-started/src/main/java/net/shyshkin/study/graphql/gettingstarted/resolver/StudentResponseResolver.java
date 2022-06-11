@@ -1,6 +1,6 @@
 package net.shyshkin.study.graphql.gettingstarted.resolver;
 
-import com.coxautodev.graphql.tools.GraphQLResolver;
+import graphql.kickstart.tools.GraphQLResolver;
 import net.shyshkin.study.graphql.gettingstarted.entity.Student;
 import net.shyshkin.study.graphql.gettingstarted.entity.Subject;
 import net.shyshkin.study.graphql.gettingstarted.filter.SubjectNameFilter;

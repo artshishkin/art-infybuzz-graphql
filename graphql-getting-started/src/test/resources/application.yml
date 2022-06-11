@@ -7,7 +7,8 @@ logging:
 
 graphiql:
   mapping: /app-ui
-  endpoint: /student-service
+  endpoint:
+    graphql: /student-service
 graphql:
   servlet:
     mapping: /student-service

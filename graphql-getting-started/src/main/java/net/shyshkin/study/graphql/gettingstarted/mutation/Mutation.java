@@ -1,6 +1,6 @@
 package net.shyshkin.study.graphql.gettingstarted.mutation;
 
-import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import graphql.kickstart.tools.GraphQLMutationResolver;
 import lombok.RequiredArgsConstructor;
 import net.shyshkin.study.graphql.gettingstarted.entity.Student;
 import net.shyshkin.study.graphql.gettingstarted.request.CreateStudentRequest;
