@@ -3,6 +3,7 @@ package net.shyshkin.study.graphql.gettingstarted.query;
 import graphql.kickstart.tools.GraphQLQueryResolver;
 import lombok.RequiredArgsConstructor;
 import net.shyshkin.study.graphql.gettingstarted.entity.Student;
+import net.shyshkin.study.graphql.gettingstarted.mapper.StudentMapper;
 import net.shyshkin.study.graphql.gettingstarted.request.SampleRequest;
 import net.shyshkin.study.graphql.gettingstarted.response.StudentResponse;
 import net.shyshkin.study.graphql.gettingstarted.service.StudentService;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class Query implements GraphQLQueryResolver {
 
     private final StudentService studentService;
+    private final StudentMapper studentMapper;
 
     public String firstQuery() {
         return "First Query";
@@ -32,7 +34,7 @@ public class Query implements GraphQLQueryResolver {
 
     public StudentResponse student(long id) {
         Student student = studentService.getStudentById(id);
-        return new StudentResponse(student);
+        return studentMapper.toDto(student);
     }
 
 }

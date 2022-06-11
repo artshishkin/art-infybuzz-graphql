@@ -1,9 +1,11 @@
 package net.shyshkin.study.graphql.gettingstarted.resolver;
 
 import graphql.kickstart.tools.GraphQLResolver;
+import lombok.RequiredArgsConstructor;
 import net.shyshkin.study.graphql.gettingstarted.entity.Student;
 import net.shyshkin.study.graphql.gettingstarted.entity.Subject;
 import net.shyshkin.study.graphql.gettingstarted.filter.SubjectNameFilter;
+import net.shyshkin.study.graphql.gettingstarted.mapper.SubjectMapper;
 import net.shyshkin.study.graphql.gettingstarted.response.StudentResponse;
 import net.shyshkin.study.graphql.gettingstarted.response.SubjectResponse;
 import org.springframework.stereotype.Component;
@@ -16,7 +18,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
+@RequiredArgsConstructor
 public class StudentResponseResolver implements GraphQLResolver<StudentResponse> {
+
+    private final SubjectMapper subjectMapper;
 
     public List<SubjectResponse> getLearningSubjects(StudentResponse studentResponse, List<SubjectNameFilter> subjectNameFilters) {
         var learningSubjects = new ArrayList<SubjectResponse>();
@@ -36,7 +41,7 @@ public class StudentResponseResolver implements GraphQLResolver<StudentResponse>
         if (student.getLearningSubjects() != null) {
             for (Subject subject : student.getLearningSubjects()) {
                 if (filterIsOff || filterNameList.contains(subject.getSubjectName().toLowerCase()))
-                    learningSubjects.add(new SubjectResponse(subject));
+                    learningSubjects.add(subjectMapper.toDto(subject));
             }
         }
         return learningSubjects;
