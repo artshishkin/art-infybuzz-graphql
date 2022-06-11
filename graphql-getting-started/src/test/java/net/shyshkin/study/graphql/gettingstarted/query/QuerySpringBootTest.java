@@ -707,7 +707,7 @@ class QuerySpringBootTest {
         void getStudent(long studentId) throws JsonProcessingException {
 
             //given
-            String queryWithVariable = "query student($studentId: Int, $filters:[SubjectNameFilter!]){\n" +
+            String queryWithVariable = "query student($studentId: Long, $filters:[SubjectNameFilter!]){\n" +
                     "  student(id:$studentId) {\n" +
                     "    id\n" +
                     "    firstName\n" +
