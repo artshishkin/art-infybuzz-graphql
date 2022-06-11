@@ -1,0 +1,6 @@
+### Get Student through REST
+
+GET http://localhost:8090/api/students/2
+Accept: application/json
+
+
