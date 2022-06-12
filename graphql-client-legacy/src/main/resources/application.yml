@@ -3,3 +3,10 @@ server:
 graphql:
   client:
     url: http://localhost:8080/student-service
+
+app:
+  resource:
+    query:
+      get-student: get_student.graphql
+    mutation:
+      create-student: create_student.graphql
