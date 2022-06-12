@@ -3,4 +3,29 @@
 GET http://localhost:8090/api/students/2
 Accept: application/json
 
+### Create student through REST
+
+POST http://localhost:8090/api/students
+Content-Type: application/json
+
+{
+  "firstName": "Nazar",
+  "lastName": "Shyshkin",
+  "email": "nazar.shyshkin@gmail.com",
+  "street": "Kramatorska",
+  "city": "Lviv",
+  "subjectsLearning": [
+    {
+      "subjectName": "MySQL",
+      "marksObtained": 78.0
+    },
+    {
+      "subjectName": "Java",
+      "marksObtained": 90
+    }
+  ]
+}
+
+
+
 
