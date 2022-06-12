@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  graphql-jpa:
+    image: artarkatesoft/art-infybuzz-graphql-jpa
+    ports:
+      - "8080:8080"
+    environment:
+      "spring.profiles.active": testcontainer
