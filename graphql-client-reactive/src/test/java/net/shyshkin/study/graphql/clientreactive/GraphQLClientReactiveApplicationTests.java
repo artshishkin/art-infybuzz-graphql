@@ -6,13 +6,11 @@ import net.shyshkin.study.graphql.clientreactive.response.StudentResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
@@ -35,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class GraphQLClientReactiveApplicationTests {
 
     @Autowired
-    TestRestTemplate restTemplate;
+    WebTestClient webTestClient;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -52,36 +50,37 @@ class GraphQLClientReactiveApplicationTests {
         Long studentId = 1L;
 
         //when
-        ResponseEntity<StudentResponse> responseEntity = restTemplate.getForEntity("/api/students/{id}", StudentResponse.class, studentId);
+        webTestClient.get().uri("/api/students/{id}", studentId)
+                .exchange()
 
-        //then
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        StudentResponse studentResponse = responseEntity.getBody();
-        assertThat(studentResponse)
-                .hasNoNullFieldsOrProperties()
-                .satisfies(st -> assertAll(
-                        () -> assertThat(st.getId()).isEqualTo(1L),
-                        () -> log.debug("{}", st),
-                        () -> assertThat(st.getFirstName()).isEqualTo("John"),
-                        () -> assertThat(st.getLastName()).isEqualTo("Smith"),
-                        () -> assertThat(st.getFullName()).isEqualTo("John Smith"),
-                        () -> assertThat(st.getCity()).isEqualTo("Delhi"),
-                        () -> assertThat(st.getStreet()).isEqualTo("Happy Street"),
-                        () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com")
-                ));
-        assertThat(studentResponse.getLearningSubjects())
-                .hasSize(2)
-                .anySatisfy(subResp -> assertThat(subResp)
-                        .hasNoNullFieldsOrProperties()
-                        .hasFieldOrPropertyWithValue("id", 1L)
-                        .hasFieldOrPropertyWithValue("subjectName", "Java")
-                        .hasFieldOrPropertyWithValue("marksObtained", 80.00)
-                )
-                .anySatisfy(subResp -> assertThat(subResp)
-                        .hasNoNullFieldsOrProperties()
-                        .hasFieldOrPropertyWithValue("id", 2L)
-                        .hasFieldOrPropertyWithValue("subjectName", "MySQL")
-                        .hasFieldOrPropertyWithValue("marksObtained", 70.00)
+                //then
+                .expectStatus().isOk()
+                .expectBody(StudentResponse.class)
+                .value(st -> assertAll(
+                                () -> assertThat(st).hasNoNullFieldsOrProperties(),
+                                () -> assertThat(st.getId()).isEqualTo(1L),
+                                () -> log.debug("{}", st),
+                                () -> assertThat(st.getFirstName()).isEqualTo("John"),
+                                () -> assertThat(st.getLastName()).isEqualTo("Smith"),
+                                () -> assertThat(st.getFullName()).isEqualTo("John Smith"),
+                                () -> assertThat(st.getCity()).isEqualTo("Delhi"),
+                                () -> assertThat(st.getStreet()).isEqualTo("Happy Street"),
+                                () -> assertThat(st.getEmail()).isEqualTo("john@gmail.com"),
+                                () -> assertThat(st.getLearningSubjects())
+                                        .hasSize(2)
+                                        .anySatisfy(subResp -> assertThat(subResp)
+                                                .hasNoNullFieldsOrProperties()
+                                                .hasFieldOrPropertyWithValue("id", 1L)
+                                                .hasFieldOrPropertyWithValue("subjectName", "Java")
+                                                .hasFieldOrPropertyWithValue("marksObtained", 80.00)
+                                        )
+                                        .anySatisfy(subResp -> assertThat(subResp)
+                                                .hasNoNullFieldsOrProperties()
+                                                .hasFieldOrPropertyWithValue("id", 2L)
+                                                .hasFieldOrPropertyWithValue("subjectName", "MySQL")
+                                                .hasFieldOrPropertyWithValue("marksObtained", 70.00)
+                                        )
+                        )
                 );
     }
 
@@ -109,16 +108,16 @@ class GraphQLClientReactiveApplicationTests {
         CreateStudentRequest createStudentRequest = objectMapper.readValue(studentJson, CreateStudentRequest.class);
 
         //when
-        ResponseEntity<StudentResponse> responseEntity = restTemplate.postForEntity("/api/students", createStudentRequest, StudentResponse.class);
+        webTestClient.post()
+                .uri("/api/students")
+                .bodyValue(createStudentRequest)
+                .exchange()
 
-        //then
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        StudentResponse studentResponse = responseEntity.getBody();
-
-        assertThat(studentResponse)
-                .hasNoNullFieldsOrProperties()
-                .satisfies(st -> assertAll(
-                        () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
+                //then
+                .expectStatus().isCreated()
+                .expectBody(StudentResponse.class)
+                .value(st -> assertAll(
+                        () -> assertThat(st).hasNoNullFieldsOrProperties(),
                         () -> assertThat(st.getId()).isGreaterThanOrEqualTo(1L),
                         () -> log.debug("{}", st),
                         () -> assertThat(st.getFirstName()).isEqualTo("Kate"),
