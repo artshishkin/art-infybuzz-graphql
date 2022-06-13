@@ -21,6 +21,7 @@
         <module>graphql-spring-boot</module>
         <module>graphql-jpa</module>
         <module>graphql-client-legacy</module>
+        <module>graphql-client-reactive</module>
     </modules>
 
     <properties>
