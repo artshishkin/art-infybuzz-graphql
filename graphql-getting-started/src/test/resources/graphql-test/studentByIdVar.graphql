@@ -1,0 +1,16 @@
+query($studentId: Long, $filters:[SubjectNameFilter!]) {
+    student(id:$studentId){
+        id
+        firstName
+        lastName
+        email
+        street
+        city
+        learningSubjects(subjectNameFilters: $filters) {
+            id
+            subjectName
+            marksObtained
+        }
+        fullName
+    }
+}

@@ -17,7 +17,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -31,9 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class QuerySpringBootWebClientTest {
 
-    @Autowired
-    private TestRestTemplate restTemplate;
-
     @LocalServerPort
     private int randomServerPort;
 
@@ -45,7 +41,6 @@ class QuerySpringBootWebClientTest {
 
     private GraphQLWebClient graphQLWebClient;
 
-
     @BeforeEach
     void setUp() {
         WebClient webClient = WebClient.builder()
@@ -55,24 +50,16 @@ class QuerySpringBootWebClientTest {
     }
 
     @Nested
-    class WithInlinedDocumentTests {
+    class WithInlinedAndExternalDocumentTests {
 
         @Test
         void firstQuery() {
-            //given
-            String document = "{firstQuery}";
 
             //when
-            GraphQLRequest request = GraphQLRequest.builder()
-                    .query(document)
-                    .build();
-
-            var graphQLResponse = graphQLWebClient
-                    .post(request)
-                    .block();
+            String response = graphQLWebClient.post("graphql-test/firstQueryDoc.graphql", String.class).block();
 
             //then
-            assertThat(graphQLResponse.get("firstQuery", String.class))
+            assertThat(response)
                     .isEqualTo("First Query");
         }
 
@@ -717,40 +704,20 @@ class QuerySpringBootWebClientTest {
 
         @ParameterizedTest
         @ValueSource(longs = {1L, 2L, 3L})
-        void getStudent(long studentId) throws JsonProcessingException {
+        void getStudent(long studentId) {
 
             //given
-            String queryWithVariable = "query student($studentId: Long, $filters:[SubjectNameFilter!]){\n" +
-                    "  student(id:$studentId) {\n" +
-                    "    id\n" +
-                    "    firstName\n" +
-                    "    lastName\n" +
-                    "    fullName\n" +
-                    "    email\n" +
-                    "    street\n" +
-                    "    city\n" +
-                    "    learningSubjects (subjectNameFilters: $filters) {\n" +
-                    "      id\n" +
-                    "      subjectName\n" +
-                    "      marksObtained\n" +
-                    "    }\n" +
-                    "  }\n" +
-                    "}";
+            var variables = Map.of(
+                    "studentId", studentId,
+                    "filters", List.of(SubjectNameFilter.Java)
+            );
 
             //when
-            GraphQLRequest request = GraphQLRequest.builder()
-                    .query(queryWithVariable)
-                    .variables(Map.of(
-                            "studentId", studentId,
-                            "filters", List.of(SubjectNameFilter.Java)
-                    ))
-                    .build();
-            var graphQLResponse = graphQLWebClient
-                    .post(request)
+            var studentResponse = graphQLWebClient
+                    .post("graphql-test/studentByIdVar.graphql", variables, StudentResponse.class)
                     .block();
             //then
-            graphQLResponse.validateNoErrors();
-            assertThat(graphQLResponse.get("student", StudentResponse.class))
+            assertThat(studentResponse)
                     .satisfies(st -> assertAll(
                             () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("learningSubjects", "student"),
                             () -> assertThat(st.getId()).isEqualTo(studentId),
@@ -768,53 +735,33 @@ class QuerySpringBootWebClientTest {
         void createStudent() throws JsonProcessingException {
 
             //given
-            String createStudentQuery = "mutation ($createStReq:CreateStudentRequest){\n" +
-                    "  createStudent(createStudentRequest: $createStReq) {\n" +
-                    "    id\n" +
-                    "    firstName\n" +
-                    "    lastName\n" +
-                    "    email\n" +
-                    "    street\n" +
-                    "    city\n" +
-                    "    learningSubjects {\n" +
-                    "      id\n" +
-                    "      subjectName\n" +
-                    "      marksObtained\n" +
-                    "    }\n" +
-                    "    fullName\n" +
-                    "  }\n" +
-                    "}";
+            Map<String, Object> variables = Map.of(
+                    "createStReq", CreateStudentRequest.builder()
+                            .firstName("Nazar")
+                            .lastName("Shyshkin")
+                            .email("nazar.shyshkin@gmail.com")
+                            .city("Lviv")
+                            .street("Kramatorska")
+                            .subjectsLearning(List.of(
+                                    CreateSubjectRequest.builder()
+                                            .subjectName("MySQL")
+                                            .marksObtained(78.0)
+                                            .build(),
+                                    CreateSubjectRequest.builder()
+                                            .subjectName("Java")
+                                            .marksObtained(90.0)
+                                            .build()
+                            ))
+                            .build()
+            );
 
             //when
-            GraphQLRequest request = GraphQLRequest.builder()
-                    .query(createStudentQuery)
-                    .variables(Map.of(
-                            "createStReq", CreateStudentRequest.builder()
-                                    .firstName("Nazar")
-                                    .lastName("Shyshkin")
-                                    .email("nazar.shyshkin@gmail.com")
-                                    .city("Lviv")
-                                    .street("Kramatorska")
-                                    .subjectsLearning(List.of(
-                                            CreateSubjectRequest.builder()
-                                                    .subjectName("MySQL")
-                                                    .marksObtained(78.0)
-                                                    .build(),
-                                            CreateSubjectRequest.builder()
-                                                    .subjectName("Java")
-                                                    .marksObtained(90.0)
-                                                    .build()
-                                    ))
-                                    .build()
-                    ))
-                    .build();
-            var graphQLResponse = graphQLWebClient
-                    .post(request)
+            var studentResponse = graphQLWebClient
+                    .post("graphql-test/createStudent.graphql", variables, StudentResponse.class)
                     .block();
 
             //then
-            graphQLResponse.validateNoErrors();
-            assertThat(graphQLResponse.get("createStudent", StudentResponse.class))
+            assertThat(studentResponse)
                     .satisfies(st -> assertAll(
                             () -> assertThat(st).hasNoNullFieldsOrPropertiesExcept("student"),
                             () -> assertThat(st.getId()).isGreaterThanOrEqualTo(1L),

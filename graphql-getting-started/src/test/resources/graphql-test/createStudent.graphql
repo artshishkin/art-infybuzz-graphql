@@ -1,0 +1,16 @@
+mutation ($createStReq:CreateStudentRequest){
+    createStudent(createStudentRequest: $createStReq) {
+        id
+        firstName
+        lastName
+        email
+        street
+        city
+        learningSubjects {
+            id
+            subjectName
+            marksObtained
+        }
+        fullName
+    }
+}
